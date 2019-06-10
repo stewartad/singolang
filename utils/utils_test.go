@@ -29,9 +29,11 @@ func TestRemoveURI(t *testing.T) {
 }
 
 func TestRunCommand(t *testing.T) {
-	expectedCmd := "sudo touch abc"
-	actualCmd := runCommand("touch abc", true, true)
-	if strings.Compare(expectedCmd, actualCmd) != 0 {
-		t.Errorf("Commands %s and %s do not match", expectedCmd, actualCmd)
+	// This is going to be invalidated when the rest of the function is written
+	expectedOut := "2.4.2-dist\n"
+	command := []string {"singularity", "--version"}
+	actualOut := runCommand(command, false, true)
+	if strings.Compare(expectedOut, actualOut) != 0 {
+		t.Errorf("Commands %s and %s do not match", expectedOut, actualOut)
 	}
 }

@@ -2,15 +2,26 @@ package utils
 
 import (
 	//"unicode/utf8"
-	//"os"
+	"log"
+	"os/exec"
 	"strings"
 )
 
-func runCommand(cmd string, sudo bool, capture bool) string {
+// cmd is a slice of strings, the first being the name of the command
+// the rest are arguments
+func runCommand(cmd []string, sudo bool, capture bool) string {
+	name := cmd[0]
 	if sudo {
-		cmd = strings.Join([]string{"sudo", cmd}, " ")
+		name = strings.Join([]string{"sudo", cmd[0]}, " ")
 	}
-	return cmd;
+	process := exec.Command(name, cmd[1:]...)
+	out, err := process.Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var output strings.Builder
+	output.Write(out)
+	return output.String();
 }
 
 // SplitURI splits the URI into protocol and path"
