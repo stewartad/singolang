@@ -28,12 +28,11 @@ func TestRemoveURI(t *testing.T) {
 	}
 }
 
-func TestRunCommand(t *testing.T) {
+func TestSingularityVersion(t *testing.T) {
 	// This is going to be invalidated when the rest of the function is written
-	expectedOut := "2.4.2-dist\n"
-	command := []string {"singularity", "--version"}
-	actualOut := runCommand(command, false, true)
+	expectedOut := "2.4.2-dist"
+	actualOut := getSingularityVersion()
 	if strings.Compare(expectedOut, actualOut) != 0 {
-		t.Errorf("Commands %s and %s do not match", expectedOut, actualOut)
+		t.Errorf("Singularity versions %s and %s do not match", expectedOut, actualOut)
 	}
 }
