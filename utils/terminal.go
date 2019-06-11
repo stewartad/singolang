@@ -7,9 +7,11 @@ import (
 	"strings"
 )
 
-// RunCommand runs a command in the terminal
-// cmd is a slice of strings, the first being the name of the command
-// the rest are arguments
+// RunCommand runs a terminal command
+/*	cmd is a slice of strings, 
+	the first element of cmd must be the name of the command
+	the remaining elements are arguments 
+*/
 func RunCommand(cmd []string, sudo bool) string {
 	name := cmd[0]
 	if sudo {
