@@ -1,0 +1,5 @@
+package sing
+
+func pull() {
+	
+}
