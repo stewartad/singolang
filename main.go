@@ -8,4 +8,5 @@ import (
 func main() {
 	fmt.Println("hello")
 	utils.Mkdirp("./testdir/two/three")
+	fmt.Printf("Singularity Version: %s", utils.GetSingularityVersion())
 }

@@ -7,9 +7,10 @@ import (
 	"strings"
 )
 
+// RunCommand runs a command in the terminal
 // cmd is a slice of strings, the first being the name of the command
 // the rest are arguments
-func runCommand(cmd []string, sudo bool) string {
+func RunCommand(cmd []string, sudo bool) string {
 	name := cmd[0]
 	if sudo {
 		name = strings.Join([]string{"sudo", cmd[0]}, " ")
@@ -29,20 +30,21 @@ func runCommand(cmd []string, sudo bool) string {
 	return output.String();
 }
 
-func getSingularityVersion() string {
-	version := runCommand([]string{"singularity", "--version"}, false)
+// GetSingularityVersion gets installed Singularity version
+func GetSingularityVersion() string {
+	version := RunCommand([]string{"singularity", "--version"}, false)
 	return strings.TrimSpace(version)
 }
 
 // SplitURI splits the URI into protocol and path"
-func splitURI(container string) (string, string) {
+func SplitURI(container string) (string, string) {
 	// Splits
 	parts := strings.Split(container, "://")
 	return parts[0], parts[1]
 }
 
 // RemoveURI strips the protocol and returns only the path
-func removeURI(container string) string {
-	_, path := splitURI(container)
+func RemoveURI(container string) string {
+	_, path := SplitURI(container)
 	return path
 }
