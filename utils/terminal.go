@@ -12,29 +12,32 @@ import (
 	the first element of cmd must be the name of the command
 	the remaining elements are arguments 
 */
-func RunCommand(cmd []string, sudo bool) string {
-	name := cmd[0]
+func RunCommand(cmd []string, sudo bool) (string, error) {
 	if sudo {
-		name = strings.Join([]string{"sudo", cmd[0]}, " ")
+		cmd = append([]string{"sudo"}, cmd...)
 	}
+	name := cmd[0]
 	// create command instance
 	process := exec.Command(name, cmd[1:]...)
 	// get stdout and stderr
-	out, err := process.Output()
+	out, err := process.CombinedOutput()
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	// convert stdout to string
 	var output strings.Builder
 	output.Write(out)
 	
 	// return output
-	return output.String();
+	return output.String(), nil;
 }
 
 // GetSingularityVersion gets installed Singularity version
 func GetSingularityVersion() string {
-	version := RunCommand([]string{"singularity", "--version"}, false)
+	version, err := RunCommand([]string{"singularity", "--version"}, false)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	return strings.TrimSpace(version)
 }
 
