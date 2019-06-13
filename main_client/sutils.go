@@ -1,4 +1,4 @@
-package sing
+package main_client
 
 import (
 	"path/filepath"

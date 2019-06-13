@@ -1,5 +1,0 @@
-package sing
-
-func pull() {
-	
-}

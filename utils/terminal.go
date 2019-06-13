@@ -12,22 +12,27 @@ import (
 	"sync"
 )
 
-// RunCommand runs a terminal command
-/*	cmd is a slice of strings, 
-	the first element of cmd must be the name of the command
-	the remaining elements are arguments 
+/*RunCommand runs a terminal command
+	cmd - a slice of strings, of which the first element must be the command name
+		all subsequent elements are the arguments
+	sudo - set to True to run command as su
+	quiet - set to True to not print stdout to the screen
+		note that stderr will always print to screen
 */
 func RunCommand(cmd []string, sudo bool, quiet bool) (string, string) {
+	// add sudo to front of command if requested
 	if sudo {
 		cmd = append([]string{"sudo"}, cmd...)
 	}
 	name := cmd[0]
+
 	// create command instance
 	process := exec.Command(name, cmd[1:]...)
 
+	// buffers to store stdout and stderr to be returned
 	var stdoutBuf, stderrBuf bytes.Buffer
 
-	// get stdout and stderr
+	// get stdout and stderr pipes
 	stdout, err := process.StdoutPipe()
 	if err != nil {
 		fmt.Printf("Error getting stdout: %s\n", err)
@@ -42,14 +47,16 @@ func RunCommand(cmd []string, sudo bool, quiet bool) (string, string) {
 	var errStdout, errStderr error
 	var outWriter, errWriter io.Writer
 	if quiet {
+		// only write stdout to buffer, bot to screen
 		outWriter = io.Writer(&stdoutBuf)
-		errWriter = io.Writer(&stderrBuf)
 	} else {
+		// write stdout to both buffer and screen
 		outWriter = io.MultiWriter(os.Stdout, &stdoutBuf)
-		errWriter = io.MultiWriter(os.Stderr, &stderrBuf)
 	}
-	
+	// write stderr to both buffer and screen
+	errWriter = io.MultiWriter(os.Stderr, &stderrBuf)
 
+	// capture stdout concurrently
 	var wg sync.WaitGroup
 	wg.Add(1)
 
@@ -58,10 +65,13 @@ func RunCommand(cmd []string, sudo bool, quiet bool) (string, string) {
 		wg.Done()
 	}()
 
+	// wait for stdout to be captured, then capture stderr
 	_, errStderr = io.Copy(errWriter, stderr)
 	wg.Wait()
 
+	// wait for command to exit
 	err = process.Wait()
+	// handle erros
 	if err != nil {
 		log.Fatalf("Command failed with %s\n", err)
 		// return nil, err
@@ -69,7 +79,7 @@ func RunCommand(cmd []string, sudo bool, quiet bool) (string, string) {
 	if errStdout != nil || errStderr != nil {
 		log.Fatalln("Failed to capture strout or stderr")
 	}
-	// return output
+	// return stdout and stderr as strings
 	return string(stdoutBuf.Bytes()), string(stderrBuf.Bytes());
 }
 

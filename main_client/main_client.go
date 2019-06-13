@@ -1,4 +1,4 @@
-package sing
+package main_client
 
 import (
 	"github.com/stewartad/singolang/utils"
@@ -10,15 +10,21 @@ import (
 	"os"
 )
 
-type client struct {
+// Client is a struct to hold information about the current client
+type Client struct {
 	simage string // the type of this will likely change to type Image
 }
 
-func GetClient() client {
-	return client{simage: ""}
+// GetClient creates and returns a new client
+func GetClient() Client {
+	return Client{simage: ""}
 }
 
-func (c client) String() string {
+func (c Client) Version() string{
+	return utils.GetSingularityVersion()
+}
+
+func (c Client) String() string {
 	var b strings.Builder
 	b.WriteString("[singularity-golang]")
 	if c.simage != "" {
@@ -29,7 +35,7 @@ func (c client) String() string {
 	return b.String()
 }
 
-func (c client) Pull(image string, name string, ext string, pullfolder string) string {
+func (c Client) Pull(image string, name string, ext string, pullfolder string) string {
 	cmd := initCommand("pull")
 	match, err := regexp.MatchString("^(shub|docker)://", image)
 	if err != nil {
@@ -51,9 +57,6 @@ func (c client) Pull(image string, name string, ext string, pullfolder string) s
 	fmt.Printf("%s\n", strings.Join(cmd, " "))
 
 	utils.RunCommand(cmd, false, false)
-	// if strings.TrimSpace(runerr) != "" {
-	// 	log.Fatalf("%s\n", runerr)
-	// }
 
 	finalImage := filepath.Join(pullfolder, filepath.Base(name))
 	name = finalImage

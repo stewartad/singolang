@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	// "log"
 	"path/filepath"
 	"github.com/stewartad/singolang/utils"
 	"github.com/stewartad/singolang/sing"
