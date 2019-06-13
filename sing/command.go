@@ -17,5 +17,5 @@ func sendCommand() {
 }
 
 func runCommand(cmd []string, sudo bool) {
-	utils.RunCommand(cmd, sudo)
+	utils.RunCommand(cmd, sudo, false)
 }

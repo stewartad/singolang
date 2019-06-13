@@ -43,17 +43,17 @@ func (c client) Pull(image string, name string, ext string, pullfolder string) s
 		name = GetFilename(image, ext, false)
 	}
 
-	cmd = append(cmd, "--name")
-	cmd = append(cmd, name)
+	// cmd = append(cmd, "--name")
+	// cmd = append(cmd, name)
 
 	cmd = append(cmd, image)
 
 	fmt.Printf("%s\n", strings.Join(cmd, " "))
 
-	_, err = utils.RunCommand(cmd, false)
-	if err != nil {
-		log.Fatalf("%s\n", err)
-	}
+	utils.RunCommand(cmd, false, false)
+	// if strings.TrimSpace(runerr) != "" {
+	// 	log.Fatalf("%s\n", runerr)
+	// }
 
 	finalImage := filepath.Join(pullfolder, filepath.Base(name))
 	name = finalImage
