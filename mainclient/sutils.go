@@ -24,6 +24,7 @@ func GetFilename(image string, ext string, pwd bool) string{
 	}
 	match, err := regexp.Compile("^.*//")
 	if err != nil {
+		// TODO: Better error handling
 		log.Fatalf("%s\n", "bad")
 	}
 	image = match.ReplaceAllString(image, "")
