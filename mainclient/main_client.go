@@ -20,11 +20,11 @@ func GetClient() Client {
 	return Client{simage: ""}
 }
 
-func (c Client) Version() string{
+func (c *Client) Version() string{
 	return utils.GetSingularityVersion()
 }
 
-func (c Client) String() string {
+func (c *Client) String() string {
 	var b strings.Builder
 	b.WriteString("[singularity-golang]")
 	if c.simage != "" {
@@ -35,7 +35,7 @@ func (c Client) String() string {
 	return b.String()
 }
 
-func (c Client) Pull(image string, name string, ext string, pullfolder string) string {
+func (c *Client) Pull(image string, name string, ext string, pullfolder string) string {
 	cmd := initCommand("pull")
 	match, err := regexp.MatchString("^(shub|docker)://", image)
 	if err != nil {
