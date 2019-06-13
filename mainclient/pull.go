@@ -1,0 +1,5 @@
+package mainclient
+
+func pull() {
+	
+}
