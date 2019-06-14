@@ -2,8 +2,9 @@ package mainclient
 
 import "github.com/stewartad/singolang/utils"
 
-func initCommand(action string) []string {
-	cmd := []string{"singularity", action}
+func InitCommand(args ...string) []string {
+	cmd := []string{"singularity"}
+	cmd = append(cmd, args...)
 	// append quiet or debug if flags are set in client 
 	return cmd
 }

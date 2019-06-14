@@ -13,7 +13,7 @@ import (
 // Pull pulls image from singularityhub or dockerhub and builds it.
 // It stores the image in pullfolder, naming it name.ext
 func (c *Client) Pull(image string, name string, ext string, pullfolder string) string {
-	cmd := initCommand("pull")
+	cmd := InitCommand("pull")
 	match, err := regexp.MatchString("^(shub|docker)://", image)
 	if err != nil {
 		log.Fatalf("Something went wrong")

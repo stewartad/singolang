@@ -93,6 +93,9 @@ func GetSingularityVersion() string {
 func SplitURI(container string) (string, string) {
 	// Splits
 	parts := strings.Split(container, "://")
+	if len(parts) == 1 {
+		return "", parts[0]
+	}
 	return parts[0], parts[1]
 }
 
