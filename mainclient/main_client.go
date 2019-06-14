@@ -2,12 +2,12 @@ package mainclient
 
 import (
 	"github.com/stewartad/singolang/utils"
-	"strings"
+	"fmt"
 )
 
 // Client is a struct to hold information about the current client
 type Client struct {
-	simage string // the type of this will likely change to type Image
+	simage string // this will be assigned by the load() function
 }
 
 // GetClient creates and returns a new client
@@ -15,17 +15,15 @@ func GetClient() Client {
 	return Client{simage: ""}
 }
 
-func (c *Client) Version() string{
+// Version returns the version of the system's Singularity installation
+func (c *Client) Version() string {
 	return utils.GetSingularityVersion()
 }
 
 func (c *Client) String() string {
-	var b strings.Builder
-	b.WriteString("[singularity-golang]")
+	baseClient := "[singularity-golang]"
 	if c.simage != "" {
-		b.WriteString("[")
-		b.WriteString(c.simage)
-		b.WriteString("]")
+		baseClient = fmt.Sprintf("%s[%s]", baseClient, c.simage)
 	}
-	return b.String()
+	return baseClient
 }
