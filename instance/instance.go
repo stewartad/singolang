@@ -38,13 +38,13 @@ func GetInstance(image string, name string, options ...string) *Instance {
 	return i
 }
 
-// ParseImageName sets elements of the Instance i to values gathered from image. 
-// It is automatically called by GetInstance(), so it only needs to be manually called on a manually defined struct
+// parseImageName processes the image name and protocol
 func (i *Instance) parseImageName(image string) {
 	i.imageURI = image
 	i.protocol, i.image = utils.SplitURI(image)
 }
 
+// TODO: make this do something
 func (i *Instance) updateMetadata() {
 
 }
