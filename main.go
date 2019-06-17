@@ -21,12 +21,14 @@ func main() {
 	img := client.Pull("docker://godlovedc/lolcow", "", "", "")
 	utils.RunCommand([]string{"ls", "-l", filepath.Dir(img)}, false, false)
 
-	i := instance.GetInstance("lolcow_latest.sif")
-	i.Start("", "lolcow1", false)
+	i := instance.GetInstance("lolcow_latest.sif", "lolcow1")
+	i.Start(false)
+
+	fmt.Println(i)
 
 	utils.RunCommand([]string{"singularity", "instance", "list"}, false, false)
 
-	i.Stop("", false)
+	i.Stop(false)
 
 	utils.RunCommand([]string{"singularity", "instance", "list"}, false, false)
 }
