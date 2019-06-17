@@ -2,6 +2,8 @@ package mainclient
 
 import (
 	"strings"
+	"fmt"
+	"os"
 	"github.com/stewartad/singolang/utils"
 )
 
@@ -9,7 +11,7 @@ import (
 func (c *Client) Execute(image string, command string) string {
 	// TODO: check install
 
-	cmd := InitCommand("exec")
+	cmd := utils.InitCommand("exec")
 
 	// --nv for graphics card drivers
 
@@ -27,7 +29,10 @@ func (c *Client) Execute(image string, command string) string {
 	cmd = append(cmd, image)
 	cmd = append(cmd, splitCommand...)
 
-	out, _ := utils.RunCommand(cmd, false, false)
+	out, err := utils.RunCommand(cmd, false, false)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error running command: %s\n", strings.Join(cmd, " "))
+	}
 	return out
 	
 }

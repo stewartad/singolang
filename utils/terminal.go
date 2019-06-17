@@ -6,11 +6,19 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"fmt"
+	// "fmt"
 	"io"
 	"bytes"
 	"sync"
 )
+
+// InitCommand creates a slice of strings of which the first element is "singularity" followed by all args
+func InitCommand(args ...string) []string {
+	cmd := []string{"singularity"}
+	cmd = append(cmd, args...)
+	// append quiet or debug if flags are set in client 
+	return cmd
+}
 
 /*RunCommand runs a terminal command
 	cmd - a slice of strings, of which the first element must be the command name
@@ -19,7 +27,7 @@ import (
 	quiet - set to True to not print stdout to the screen
 		note that stderr will always print to screen
 */
-func RunCommand(cmd []string, sudo bool, quiet bool) (string, string) {
+func RunCommand(cmd []string, sudo bool, quiet bool) (string, error) {
 	// add sudo to front of command if requested
 	if sudo {
 		cmd = append([]string{"sudo"}, cmd...)
@@ -35,11 +43,11 @@ func RunCommand(cmd []string, sudo bool, quiet bool) (string, string) {
 	// get stdout and stderr pipes
 	stdout, err := process.StdoutPipe()
 	if err != nil {
-		fmt.Printf("Error getting stdout: %s\n", err)
+		log.Printf("Error getting stdout: %s\n", err)
 	}
 	stderr, err := process.StderrPipe()
 	if err != nil {
-		fmt.Printf("Error getting stderr: %s\n", err)
+		log.Printf("Error getting stderr: %s\n", err)
 	}
 
 	process.Start()
@@ -73,14 +81,14 @@ func RunCommand(cmd []string, sudo bool, quiet bool) (string, string) {
 	err = process.Wait()
 	// handle erros
 	if err != nil {
-		log.Fatalf("Command failed with %s\n", err)
-		// return nil, err
+		log.Printf("Command failed with %s\n", err)
+		return string(stderrBuf.Bytes()), err
 	}
 	if errStdout != nil || errStderr != nil {
-		log.Fatalln("Failed to capture strout or stderr")
+		log.Printf("Failed to capture strout or stderr")
 	}
 	// return stdout and stderr as strings
-	return string(stdoutBuf.Bytes()), string(stderrBuf.Bytes());
+	return string(stdoutBuf.Bytes()), err
 }
 
 // GetSingularityVersion gets installed Singularity version

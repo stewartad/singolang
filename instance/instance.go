@@ -2,7 +2,6 @@ package instance
 
 import (
 	"github.com/stewartad/singolang/utils"
-	"github.com/stewartad/singolang/mainclient"
 	"fmt"
 	"strings"
 )
@@ -51,19 +50,21 @@ func (i *Instance) updateMetadata() {
 
 // Start starts an instance
 // Does not support startscript args
-func (i *Instance) Start(sudo bool) {
-	cmd := mainclient.InitCommand("instance", "start")
+func (i *Instance) Start(sudo bool) error {
+	cmd := utils.InitCommand("instance", "start")
 	cmd = append(cmd, i.imageURI, i.name)
 
-	_, _ = utils.RunCommand(cmd, sudo, false)
+	_, err := utils.RunCommand(cmd, sudo, false)
+	return err
 }
 
 // Stop stops an instance.
-func (i *Instance) Stop(sudo bool) {
-	cmd := mainclient.InitCommand("instance", "stop")
+func (i *Instance) Stop(sudo bool) error {
+	cmd := utils.InitCommand("instance", "stop")
 	cmd = append(cmd, i.name)
 
-	_, _ = utils.RunCommand(cmd, sudo, false)
+	_, err := utils.RunCommand(cmd, sudo, false)
+	return err
 }
 
 /*
