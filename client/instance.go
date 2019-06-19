@@ -1,23 +1,23 @@
 package client
 
 import (
-	"github.com/stewartad/singolang/utils"
 	"fmt"
+	"github.com/stewartad/singolang/utils"
 	"strings"
 )
 
-// Instance holds information about a currently running image instance
-type instance struct {
-	name string
+// Instance holds information about a currently running image Instance
+type Instance struct {
+	name     string
 	imageURI string
 	protocol string
-	image string
-	cmd []string
-	options []string
+	image    string
+	cmd      []string
+	options  []string
 	metadata []string // might go unused
 }
 
-func (i *instance) String() string {
+func (i *Instance) String() string {
 	if i.protocol != "" {
 		return fmt.Sprintf("%s:\\%s", i.protocol, i.image)
 	}
@@ -25,8 +25,8 @@ func (i *instance) String() string {
 }
 
 // GetInstance returns a new Instance with image information
-func getInstance(image string, name string, options ...string) *instance {
-	i := new(instance)
+func getInstance(image string, name string, options ...string) *Instance {
+	i := new(Instance)
 	i.parseImageName(image)
 
 	if name != "" {
@@ -38,19 +38,19 @@ func getInstance(image string, name string, options ...string) *instance {
 }
 
 // parseImageName processes the image name and protocol
-func (i *instance) parseImageName(image string) {
+func (i *Instance) parseImageName(image string) {
 	i.imageURI = image
 	i.protocol, i.image = utils.SplitURI(image)
 }
 
 // TODO: make this do something
-func (i *instance) updateMetadata() {
+func (i *Instance) updateMetadata() {
 
 }
 
 // Start starts an instance
 // Does not support startscript args
-func (i *instance) start(sudo bool) error {
+func (i *Instance) start(sudo bool) error {
 	cmd := utils.InitCommand("instance", "start")
 	cmd = append(cmd, i.imageURI, i.name)
 
@@ -59,7 +59,7 @@ func (i *instance) start(sudo bool) error {
 }
 
 // Stop stops an instance.
-func (i *instance) stop(sudo bool) error {
+func (i *Instance) stop(sudo bool) error {
 	cmd := utils.InitCommand("instance", "stop")
 	cmd = append(cmd, i.name)
 
@@ -71,8 +71,8 @@ func (i *instance) stop(sudo bool) error {
  * Getters for Instance fields
  */
 
- // GetInfo returns the information about an Instance
-func (i *instance) getInfo() map[string]string {
+// GetInfo returns the information about an Instance
+func (i *Instance) GetInfo() map[string]string {
 	m := make(map[string]string)
 	m["name"] = i.name
 	m["imageURI"] = i.imageURI
@@ -85,6 +85,6 @@ func (i *instance) getInfo() map[string]string {
 
 // GetCmd returns a slice of strings that represent the full command created when i.Start() was called.
 // This slice can immediately be passed into RunCommand() to be ran again
-func (i *instance) getCmd() []string {
+func (i *Instance) GetCmd() []string {
 	return i.cmd
 }

@@ -5,8 +5,7 @@ import (
 	// "log"
 	// "os"
 	// "path/filepath"
-	// "github.com/stewartad/singolang/instance"
-	"github.com/stewartad/singolang/mainclient"
+	"github.com/stewartad/singolang/client"
 	"github.com/stewartad/singolang/utils"
 )
 
@@ -18,24 +17,27 @@ func main() {
 	// 	utils.RunCommand([]string{"rm", "lolcow_latest.sif"}, false, false)
 	// }
 
-	client := mainclient.NewClient()
+	cl := client.NewClient()
+	defer cl.Teardown()
 	// img := client.Pull("docker://godlovedc/lolcow", "", "", "")
 
 	// utils.RunCommand([]string{"ls", "-l", filepath.Dir(img)}, false, false)
 
-	client.NewInstance("lolcow_latest.sif", "lolcow1")
-	// // err := i.Start(false)
-	// if err != nil {
-	// 	log.Printf("%s\n%s", err, "")
-	// }
-	client.Execute("instance://lolcow1", "which fortune")
-	client.Execute("instance://lolcow1", "which singularity")
-	client.Execute("instance://lolcow1", "which lolcat")
+	_ = cl.NewInstance("lolcow_latest.sif", "lolcow3")
 
-	// utils.RunCommand([]string{"singularity", "instance", "list"}, false, false)
-
-	mainclient.ListInstances()
+	_, err := cl.Execute("lolcow3", "which fortune")
+	if err != nil {
+		fmt.Printf("%s\n", err)
+	}
+	_, err = cl.Execute("lolcow3", "which singularity")
+	if err != nil {
+		fmt.Printf("%s\n", err)
+	}
+	_, err = cl.Execute("lolcow3", "which lolcat")
+	if err != nil {
+		fmt.Printf("%s\n", err)
+	}
+	cl.PrintInstances()
+	client.ListInstances()
 	// i.Stop(false)
-
-	// utils.RunCommand([]string{"singularity", "instance", "list"}, false, false)
 }
