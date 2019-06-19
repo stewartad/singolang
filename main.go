@@ -25,18 +25,18 @@ func main() {
 
 	_ = cl.NewInstance("lolcow_latest.sif", "lolcow3")
 
-	_, err := cl.Execute("lolcow3", "which fortune")
+	out, err := cl.Execute("lolcow3", "which fortune")
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Printf("%s\n%s\n", out, err)
 	}
-	_, err = cl.Execute("lolcow3", "which singularity")
+	out, err = cl.Execute("lolcow3", "which singularity")
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Printf("%s\n%s\n", out, err)
 	}
 	_, err = cl.Execute("lolcow3", "which lolcat")
 	if err != nil {
 		fmt.Printf("%s\n", err)
 	}
-	cl.PrintInstances()
-	client.ListInstances()
+	cl.ListInstances()
+	client.ListAllInstances()
 }

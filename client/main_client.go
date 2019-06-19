@@ -2,10 +2,19 @@ package client
 
 import (
 	"fmt"
+	"github.com/stewartad/singolang/utils"
 	"log"
 	"strings"
-	"github.com/stewartad/singolang/utils"
 )
+
+type instanceError struct {
+	name   string
+	action string
+}
+
+func (e *instanceError) Error() string {
+	return fmt.Sprintf("Error %sing Instance: %s. Must be stopped manually in Singularity", e.name, e.action)
+}
 
 // Client is a struct to hold information about the current client
 type Client struct {
@@ -14,8 +23,8 @@ type Client struct {
 }
 
 // NewClient creates and returns a new client
-func NewClient() (Client, func (c *Client)) {
-	return Client{simage: "", instances: make(map[string]*Instance)}, func (c *Client) {
+func NewClient() (Client, func(c *Client)) {
+	return Client{simage: "", instances: make(map[string]*Instance)}, func(c *Client) {
 		c.teardown()
 	}
 }
@@ -46,16 +55,16 @@ func (c *Client) NewInstance(image string, name string) error {
 
 // StartInstance starts an instance that was previously created in the client
 // TODO: Define custom errors
-func (c *Client) StartInstance(i *Instance) error {
-	fmt.Printf("Starting Instance %s...\n", i.name)
-	err := i.start(false)
-	if err != nil {
-		fmt.Printf("FAILED\n")
-	} else {
-		fmt.Printf("SUCCESS. %s\n", i)
-	}
-	return err
-}
+// func (c *Client) StartInstance(name string) error {
+// 	fmt.Printf("Starting Instance %s...\n", name)
+// 	err := i.start(false)
+// 	if err != nil {
+// 		fmt.Printf("FAILED\n")
+// 	} else {
+// 		fmt.Printf("SUCCESS. %s\n", i)
+// 	}
+// 	return err
+// }
 
 // StopInstance stops an instance previously created in the client
 // TODO: Define custom errors
@@ -79,8 +88,8 @@ func (c *Client) StopAllInstances() error {
 	return err
 }
 
-// PrintInstances prints all client-created instances to screen
-func (c *Client) PrintInstances() {
+// ListInstances prints all client-created instances to screen
+func (c *Client) ListInstances() {
 	fmt.Println("CLIENT LOADED INSTANCES")
 	fmt.Println("-----------------")
 	if len(c.instances) < 1 {
@@ -93,9 +102,9 @@ func (c *Client) PrintInstances() {
 	fmt.Println("-----------------")
 }
 
-// ListInstances lists all currently running Singularity instances.
+// ListAllInstances lists all currently running Singularity instances.
 // It is equivalent to running `singularity instance list`
-func ListInstances() {
+func ListAllInstances() {
 	cmd := utils.InitCommand("instance", "list")
 
 	output, err := utils.RunCommand(cmd, false, false)
@@ -105,8 +114,8 @@ func ListInstances() {
 	}
 }
 
-
 func (c *Client) teardown() {
+	fmt.Println("Performing Cleanup")
 	c.StopAllInstances()
-	ListInstances()
+	ListAllInstances()
 }
