@@ -22,7 +22,8 @@ type Client struct {
 	instances map[string]*Instance
 }
 
-// NewClient creates and returns a new client
+// NewClient creates and returns a new client as well as a teardown function.
+// Assign this teardown function and defer it to exit cleanly
 func NewClient() (Client, func(c *Client)) {
 	return Client{simage: "", instances: make(map[string]*Instance)}, func(c *Client) {
 		c.teardown()
