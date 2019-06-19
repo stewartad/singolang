@@ -14,8 +14,10 @@ type Client struct {
 }
 
 // NewClient creates and returns a new client
-func NewClient() Client {
-	return Client{simage: "", instances: make(map[string]*Instance)}
+func NewClient() (Client, func (c *Client)) {
+	return Client{simage: "", instances: make(map[string]*Instance)}, func (c *Client) {
+		c.teardown()
+	}
 }
 
 // Version returns the version of the system's Singularity installation
@@ -104,6 +106,7 @@ func ListInstances() {
 }
 
 
-func (c *Client) Teardown() {
+func (c *Client) teardown() {
 	c.StopAllInstances()
+	ListInstances()
 }

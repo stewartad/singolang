@@ -17,8 +17,8 @@ func main() {
 	// 	utils.RunCommand([]string{"rm", "lolcow_latest.sif"}, false, false)
 	// }
 
-	cl := client.NewClient()
-	defer cl.Teardown()
+	cl, finish := client.NewClient()
+	defer finish(&cl)
 	// img := client.Pull("docker://godlovedc/lolcow", "", "", "")
 
 	// utils.RunCommand([]string{"ls", "-l", filepath.Dir(img)}, false, false)
@@ -39,5 +39,4 @@ func main() {
 	}
 	cl.PrintInstances()
 	client.ListInstances()
-	// i.Stop(false)
 }
