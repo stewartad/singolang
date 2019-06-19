@@ -1,20 +1,22 @@
-package mainclient
+package client
 
 import (
 	"fmt"
-	"github.com/stewartad/singolang/instance"
+	"log"
+	"strings"
+	//"github.com/stewartad/singolang/instance"
 	"github.com/stewartad/singolang/utils"
 )
 
 // Client is a struct to hold information about the current client
 type Client struct {
 	simage    string // this will be assigned by the load() function
-	instances map[string]*instance.Instance
+	currInstance	*instance
 }
 
 // NewClient creates and returns a new client
 func NewClient() Client {
-	return Client{simage: "", instances: make(map[string]*instance.Instance)}
+	return Client{simage: "", currInstance: nil}
 }
 
 // Version returns the version of the system's Singularity installation
@@ -30,21 +32,20 @@ func (c *Client) String() string {
 	return baseClient
 }
 
-func (c *Client) NewInstance(image string, name string) *instance.Instance {
-	i := instance.GetInstance(image, name)
-	c.instances[name] = i
-	i.Start(false)
+func (c *Client) newInstance(image string, name string) *instance {
+	i := getInstance(image, name)
+	c.currInstance = i
 	return i
 }
 
-func (c *Client) StartInstance(name string) error {
-	err := c.instances[name].Start(false)
+func (c *Client) StartInstance() error {
+	err := c.currInstance.start(false)
 	return err
 }
 
 func (c *Client) StopInstance(name string) error {
 	fmt.Printf("Stopping Instance %s...", name)
-	err := c.instances[name].Stop(false)
+	err := c.currInstance.stop(false)
 	if err != nil {
 		fmt.Printf("FAILED\n")
 	} else {
@@ -53,19 +54,19 @@ func (c *Client) StopInstance(name string) error {
 	return err
 }
 
-func (c *Client) StopClientInstances() error {
-	var err error
-	for k := range c.instances {
-		err = c.StopInstance(k)
-	}
-	return err
+func (c *Client) PrintInstances() {
+	fmt.Println("CLIENT LOADED INSTANCES")
+	fmt.Println("-----------------")
+	
+	fmt.Println("-----------------")
 }
 
-func (c *Client) PrintInstances() {
-	fmt.Println("RUNNING INSTANCES")
-	fmt.Println("-----------------")
-	for k, v := range c.instances {
-		fmt.Printf("%s\t%s\n", k, v)
+func ListInstances() {
+	cmd := utils.InitCommand("instance", "list")
+
+	output, err := utils.RunCommand(cmd, false, false)
+	_ = output
+	if err != nil {
+		log.Printf("Error running command: %s\n", strings.Join(cmd, " "))
 	}
-	fmt.Println("-----------------")
 }

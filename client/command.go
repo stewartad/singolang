@@ -1,4 +1,4 @@
-package mainclient
+package client
 
 import "github.com/stewartad/singolang/utils"
 

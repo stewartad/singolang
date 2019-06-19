@@ -29,7 +29,7 @@ func TestRemoveURI(t *testing.T) {
 }
 
 func TestSingularityVersion(t *testing.T) {
-	expectedOut := "2.4.2-dist"
+	expectedOut := "singularity version 3.2.1"
 	actualOut := GetSingularityVersion()
 	if strings.Compare(expectedOut, actualOut) != 0 {
 		t.Errorf("Singularity versions %s and %s do not match", expectedOut, actualOut)

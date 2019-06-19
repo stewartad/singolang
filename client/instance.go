@@ -1,4 +1,4 @@
-package instance
+package client
 
 import (
 	"github.com/stewartad/singolang/utils"
@@ -7,7 +7,7 @@ import (
 )
 
 // Instance holds information about a currently running image instance
-type Instance struct {
+type instance struct {
 	name string
 	imageURI string
 	protocol string
@@ -17,7 +17,7 @@ type Instance struct {
 	metadata []string // might go unused
 }
 
-func (i *Instance) String() string {
+func (i *instance) String() string {
 	if i.protocol != "" {
 		return fmt.Sprintf("%s:\\%s", i.protocol, i.image)
 	}
@@ -25,8 +25,8 @@ func (i *Instance) String() string {
 }
 
 // GetInstance returns a new Instance with image information
-func GetInstance(image string, name string, options ...string) *Instance {
-	i := new(Instance)
+func getInstance(image string, name string, options ...string) *instance {
+	i := new(instance)
 	i.parseImageName(image)
 
 	if name != "" {
@@ -38,19 +38,19 @@ func GetInstance(image string, name string, options ...string) *Instance {
 }
 
 // parseImageName processes the image name and protocol
-func (i *Instance) parseImageName(image string) {
+func (i *instance) parseImageName(image string) {
 	i.imageURI = image
 	i.protocol, i.image = utils.SplitURI(image)
 }
 
 // TODO: make this do something
-func (i *Instance) updateMetadata() {
+func (i *instance) updateMetadata() {
 
 }
 
 // Start starts an instance
 // Does not support startscript args
-func (i *Instance) Start(sudo bool) error {
+func (i *instance) start(sudo bool) error {
 	cmd := utils.InitCommand("instance", "start")
 	cmd = append(cmd, i.imageURI, i.name)
 
@@ -59,7 +59,7 @@ func (i *Instance) Start(sudo bool) error {
 }
 
 // Stop stops an instance.
-func (i *Instance) Stop(sudo bool) error {
+func (i *instance) stop(sudo bool) error {
 	cmd := utils.InitCommand("instance", "stop")
 	cmd = append(cmd, i.name)
 
@@ -72,7 +72,7 @@ func (i *Instance) Stop(sudo bool) error {
  */
 
  // GetInfo returns the information about an Instance
-func (i *Instance) GetInfo() map[string]string {
+func (i *instance) getInfo() map[string]string {
 	m := make(map[string]string)
 	m["name"] = i.name
 	m["imageURI"] = i.imageURI
@@ -85,7 +85,6 @@ func (i *Instance) GetInfo() map[string]string {
 
 // GetCmd returns a slice of strings that represent the full command created when i.Start() was called.
 // This slice can immediately be passed into RunCommand() to be ran again
-func (i *Instance) GetCmd() []string {
+func (i *instance) getCmd() []string {
 	return i.cmd
 }
-

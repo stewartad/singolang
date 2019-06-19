@@ -32,9 +32,10 @@ func main() {
 	client.Execute("instance://lolcow1", "which singularity")
 	client.Execute("instance://lolcow1", "which lolcat")
 
-	utils.RunCommand([]string{"singularity", "instance", "list"}, false, false)
-	client.PrintInstances()
+	// utils.RunCommand([]string{"singularity", "instance", "list"}, false, false)
+
+	mainclient.ListInstances()
 	// i.Stop(false)
 
-	utils.RunCommand([]string{"singularity", "instance", "list"}, false, false)
+	// utils.RunCommand([]string{"singularity", "instance", "list"}, false, false)
 }
