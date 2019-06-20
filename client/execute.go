@@ -42,11 +42,13 @@ func (c *Client) Execute(instance string, command string) (string, error) {
 	cmd = append(cmd, i.image)
 	cmd = append(cmd, splitCommand...)
 
-	out, err := utils.RunCommand(cmd, false, false)
+	stdout, stderr, status, err := utils.RunCommand(cmd, false, false)
+	// TODO: use status
+	_ = status
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error running command: %s\n", strings.Join(cmd, " "))
-		return out, err
+		return string(stderr.Bytes()), err
 	}
-	return out, nil
+	return string(stdout.Bytes()), nil
 	
 }

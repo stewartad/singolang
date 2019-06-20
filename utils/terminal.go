@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	// "fmt"
+	"syscall"
 	"io"
 	"bytes"
 	"sync"
@@ -27,7 +27,7 @@ func InitCommand(args ...string) []string {
 	quiet - set to True to not print stdout to the screen
 		note that stderr will always print to screen
 */
-func RunCommand(cmd []string, sudo bool, quiet bool) (string, error) {
+func RunCommand(cmd []string, sudo bool, quiet bool) (bytes.Buffer, bytes.Buffer, int, error) {
 	// add sudo to front of command if requested
 	if sudo {
 		cmd = append([]string{"sudo"}, cmd...)
@@ -77,24 +77,39 @@ func RunCommand(cmd []string, sudo bool, quiet bool) (string, error) {
 	_, errStderr = io.Copy(errWriter, stderr)
 	wg.Wait()
 
+	var waitStatus syscall.WaitStatus
+
 	// wait for command to exit
 	err = process.Wait()
 	// handle erros
 	if err != nil {
-		log.Printf("Command failed with %s\n", err)
-		return string(stderrBuf.Bytes()), err
+		if exitError, ok := err.(*exec.ExitError); ok {
+			waitStatus = exitError.Sys().(syscall.WaitStatus)
+			log.Printf("Command failed with %s\n", err)
+			return stdoutBuf, stderrBuf, waitStatus.ExitStatus(), err
+		} 
+		log.Printf("Unknown Error, Exit Status: %s", err)
+		return stdoutBuf, stderrBuf, -1, err
+		
 	}
+
+	
+	waitStatus = process.ProcessState.Sys().(syscall.WaitStatus)
 	if errStdout != nil || errStderr != nil {
 		log.Printf("Failed to capture strout or stderr")
 	}
 	// return stdout and stderr as strings
-	return string(stdoutBuf.Bytes()), err
+	return stdoutBuf, stderrBuf, waitStatus.ExitStatus(), err
 }
 
 // GetSingularityVersion gets installed Singularity version
 func GetSingularityVersion() string {
-	version, _ := RunCommand([]string{"singularity", "--version"}, false, true)
-	return strings.TrimSpace(version)
+	version, _, status, _ := RunCommand([]string{"singularity", "--version"}, false, true)
+	// log.Println(status)
+	if status == 0 {
+		return strings.TrimSpace(string(version.Bytes()))
+	}
+	return ""
 }
 
 // SplitURI splits the URI into protocol and path"

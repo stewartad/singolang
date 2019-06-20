@@ -15,7 +15,7 @@ func main() {
 
 	// instantiate a new client and defer its teardown function
 	cl, finish := client.NewClient()
-	defer finish(&cl)
+	defer finish(cl)
 	// img := client.Pull("docker://godlovedc/lolcow", "", "", "")
 
 	// create a new instance

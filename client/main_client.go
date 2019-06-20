@@ -24,8 +24,8 @@ type Client struct {
 
 // NewClient creates and returns a new client as well as a teardown function.
 // Assign this teardown function and defer it to exit cleanly
-func NewClient() (Client, func(c *Client)) {
-	return Client{simage: "", instances: make(map[string]*Instance)}, func(c *Client) {
+func NewClient() (*Client, func(c *Client)) {
+	return &Client{simage: "", instances: make(map[string]*Instance)}, func(c *Client) {
 		c.teardown()
 	}
 }
@@ -108,8 +108,9 @@ func (c *Client) ListInstances() {
 func ListAllInstances() {
 	cmd := utils.InitCommand("instance", "list")
 
-	output, err := utils.RunCommand(cmd, false, false)
-	_ = output
+	output, stderr, status, err := utils.RunCommand(cmd, false, false)
+	// TODO: do something with these values
+	_, _, _ = output, status, stderr
 	if err != nil {
 		log.Printf("Error running command: %s\n", strings.Join(cmd, " "))
 	}

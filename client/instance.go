@@ -54,7 +54,9 @@ func (i *Instance) start(sudo bool) error {
 	cmd := utils.InitCommand("instance", "start")
 	cmd = append(cmd, i.imageURI, i.name)
 
-	_, err := utils.RunCommand(cmd, sudo, false)
+	stdout, stderr, status, err := utils.RunCommand(cmd, sudo, false)
+		// TODO: use these
+		_, _, _ = stdout, stderr, status
 	return err
 }
 
@@ -63,7 +65,9 @@ func (i *Instance) stop(sudo bool) error {
 	cmd := utils.InitCommand("instance", "stop")
 	cmd = append(cmd, i.name)
 
-	_, err := utils.RunCommand(cmd, sudo, false)
+	stdout, stderr, status, err := utils.RunCommand(cmd, sudo, false)
+	// TODO: use these
+	_, _, _ = stdout, stderr, status
 	return err
 }
 
