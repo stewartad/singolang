@@ -85,10 +85,10 @@ func RunCommand(cmd []string, sudo bool, quiet bool) (bytes.Buffer, bytes.Buffer
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
 			waitStatus = exitError.Sys().(syscall.WaitStatus)
-			log.Printf("Command failed with %s\n", err)
+			// log.Printf("Command failed with %s\n", err)
 			return stdoutBuf, stderrBuf, waitStatus.ExitStatus(), err
 		} 
-		log.Printf("Unknown Error, Exit Status: %s", err)
+		// log.Printf("Unknown Error, Exit Status: %s", err)
 		return stdoutBuf, stderrBuf, -1, err
 		
 	}

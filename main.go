@@ -25,19 +25,15 @@ func main() {
 	}
 
 	// Run some executes
-	out, err := cl.Execute("lolcow3", "which fortune")
-	if err != nil {
-		fmt.Printf("%s\n%s\n", out, err)
-	}
+	stdout, stderr, code, err := cl.Execute("lolcow3", []string{"which", "fortune"})
+	fmt.Printf("%s\n%s\n%d\t%s\n", stdout, stderr, code, err)
+
 	// This one is designed to fail
-	out, err = cl.Execute("lolcow3", "which singularity")
-	if err != nil {
-		fmt.Printf("%s\n%s\n", out, err)
-	}
-	_, err = cl.Execute("lolcow3", "which lolcat")
-	if err != nil {
-		fmt.Printf("%s\n", err)
-	}
+	stdout, stderr, code, err = cl.Execute("lolcow3", []string{"which", "singularity"})
+	fmt.Printf("%s\n%s\n%d\t%s\n", stdout, stderr, code, err)
+
+	stdout, stderr, code, err = cl.Execute("lolcow3", []string{"which", "lolcat"})
+	fmt.Printf("%s\n%s\n%d\t%s\n", stdout, stderr, code, err)
 
 	// List client's stored images
 	cl.ListInstances()

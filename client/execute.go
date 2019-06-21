@@ -1,9 +1,9 @@
 package client
 
 import (
-	"strings"
+	_"strings"
 	"fmt"
-	"os"
+	_"os"
 	"github.com/stewartad/singolang/utils"
 )
 
@@ -16,14 +16,14 @@ func (e *existError) Error() string {
 }
 
 // Execute runs a command inside a container
-func (c *Client) Execute(instance string, command string) (string, error) {
+func (c *Client) Execute(instance string, command []string) (string, string, int, error) {
 	// TODO: check install
 
 	cmd := utils.InitCommand("exec")
 
 	i, e := c.instances[instance]
 	if !e {
-		return "", &existError{instance} 
+		return "", "", -1, &existError{instance} 
 	}
 
 	// --nv for graphics card drivers
@@ -38,17 +38,17 @@ func (c *Client) Execute(instance string, command string) (string, error) {
 
 	// TODO: sudo/writable
 
-	splitCommand := strings.Split(command, " ")
+	// splitCommand := strings.Split(command, " ")
 	cmd = append(cmd, i.image)
-	cmd = append(cmd, splitCommand...)
+	cmd = append(cmd, command...)
 
 	stdout, stderr, status, err := utils.RunCommand(cmd, false, false)
 	// TODO: use status
 	_ = status
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error running command: %s\n", strings.Join(cmd, " "))
-		return string(stderr.Bytes()), err
+		// fmt.Fprintf(os.Stderr, "Error running command: %s\n", strings.Join(cmd, " "))
+		return string(stdout.Bytes()), string(stderr.Bytes()), -1, err
 	}
-	return string(stdout.Bytes()), nil
+	return string(stdout.Bytes()), string(stderr.Bytes()), 0, nil
 	
 }
