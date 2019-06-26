@@ -16,7 +16,7 @@ func (e *existError) Error() string {
 }
 
 // Execute runs a command inside a container
-func (c *Client) Execute(instance string, command []string) (string, string, int, error) {
+func (c *Client) Execute(instance string, command []string, quiet bool) (string, string, int, error) {
 	// TODO: check install
 
 	cmd := utils.InitCommand("exec")
@@ -42,7 +42,7 @@ func (c *Client) Execute(instance string, command []string) (string, string, int
 	cmd = append(cmd, i.image)
 	cmd = append(cmd, command...)
 
-	stdout, stderr, status, err := utils.RunCommand(cmd, false, false)
+	stdout, stderr, status, err := utils.RunCommand(cmd, false, quiet)
 	// TODO: use status
 	_ = status
 	if err != nil {

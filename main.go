@@ -25,14 +25,14 @@ func main() {
 	}
 
 	// Run some executes
-	stdout, stderr, code, err := cl.Execute("lolcow3", []string{"which", "fortune"})
+	stdout, stderr, code, err := cl.Execute("lolcow3", []string{"which", "fortune"}, false)
 	fmt.Printf("%s\n%s\n%d\t%s\n", stdout, stderr, code, err)
 
 	// This one is designed to fail
-	stdout, stderr, code, err = cl.Execute("lolcow3", []string{"which", "singularity"})
+	stdout, stderr, code, err = cl.Execute("lolcow3", []string{"which", "singularity"}, false)
 	fmt.Printf("%s\n%s\n%d\t%s\n", stdout, stderr, code, err)
 
-	stdout, stderr, code, err = cl.Execute("lolcow3", []string{"which", "lolcat"})
+	stdout, stderr, code, err = cl.Execute("lolcow3", []string{"which", "lolcat"}, false)
 	fmt.Printf("%s\n%s\n%d\t%s\n", stdout, stderr, code, err)
 
 	// List client's stored images

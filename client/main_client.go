@@ -70,12 +70,12 @@ func (c *Client) NewInstance(image string, name string) error {
 // StopInstance stops an instance previously created in the client
 // TODO: Define custom errors
 func (c *Client) StopInstance(name string) error {
-	fmt.Printf("Stopping Instance %s...", name)
+	// fmt.Printf("Stopping Instance %s...", name)
 	err := c.instances[name].stop(false)
 	if err != nil {
-		fmt.Printf("FAILED\n")
+		// fmt.Printf("FAILED\n")
 	} else {
-		fmt.Printf("\n")
+		// fmt.Printf("\n")
 	}
 	return err
 }
