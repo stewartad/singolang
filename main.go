@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	fmt.Println("hello")
+	fmt.Println("hello world")
 	fmt.Printf("Singularity Version: %s\n", utils.GetSingularityVersion())
 
 	// instantiate a new client and defer its teardown function
