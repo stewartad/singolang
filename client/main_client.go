@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/stewartad/singolang/utils"
 	"log"
+	"path/filepath"
 	"strings"
 )
 
@@ -52,6 +53,21 @@ func (c *Client) NewInstance(image string, name string) error {
 	}
 	c.instances[name] = i
 	return nil
+}
+
+// CopyTarball creates a Tar archive of a directory or file and places it in /tmp. 
+// It returns the path to the archive
+func (c *Client) CopyTarball(instance string, path string) (string, error) {
+	name := filepath.Base(path)
+	dir := fmt.Sprintf("/tmp/%s", c.instances[instance].image)
+	utils.Mkdirp(dir)
+	archivePath := fmt.Sprintf("%s/%s-archive.tar.gz", dir, name)
+	cmd := []string{"tar", "-czvf", archivePath, path}
+	_, _, code, err := c.Execute(instance, cmd, false)
+	if err != nil || code != 0 {
+		return "", err
+	}
+	return archivePath, nil
 }
 
 // StartInstance starts an instance that was previously created in the client
@@ -121,3 +137,4 @@ func (c *Client) teardown() {
 	c.StopAllInstances()
 	ListAllInstances()
 }
+

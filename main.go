@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
-	// "log"
-	// "os"
+	"log"
+	"os"
 	// "path/filepath"
 	"github.com/stewartad/singolang/client"
 	"github.com/stewartad/singolang/utils"
 )
 
 func main() {
+	fmt.Println(os.Args[0])
 	fmt.Println("hello world")
 	fmt.Printf("Singularity Version: %s\n", utils.GetSingularityVersion())
 
@@ -34,6 +35,17 @@ func main() {
 
 	stdout, stderr, code, err = cl.Execute("lolcow3", []string{"which", "lolcat"}, false)
 	fmt.Printf("%s\n%s\n%d\t%s\n", stdout, stderr, code, err)
+
+	t, err := cl.CopyTarball("lolcow3", "/usr/games")
+	if err != nil {
+		log.Fatalf("Error creating tar: %s", err)
+	}
+	fmt.Println(t)
+	file, err := os.Stat(t)
+	if err != nil {
+		log.Fatalf("File not found")
+	}
+	fmt.Printf("%s - %d - %s\n\n", file.Name(), file.Size(), file.Mode())
 
 	// List client's stored images
 	cl.ListInstances()
