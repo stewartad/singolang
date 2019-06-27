@@ -56,18 +56,29 @@ func (c *Client) NewInstance(image string, name string) error {
 }
 
 // CopyTarball creates a Tar archive of a directory or file and places it in /tmp. 
-// It returns the path to the archive
-func (c *Client) CopyTarball(instance string, path string) (string, error) {
-	name := filepath.Base(path)
-	dir := fmt.Sprintf("/tmp/%s", c.instances[instance].image)
+// It returns the path to the archive, and the name of the parent folder inside
+func (c *Client) CopyTarball(instance string, path string) (string, string, error) {
+	
+	parentDir := filepath.Dir(path)
+	parentDirName := filepath.Base(parentDir)
+	grandparentDir := filepath.Dir(parentDir)
+	fmt.Println(parentDir)
+	fmt.Println(filepath.Base(parentDir))
+
+	dir := fmt.Sprintf("/tmp/%s", instance)
 	utils.Mkdirp(dir)
-	archivePath := fmt.Sprintf("%s/%s-archive.tar.gz", dir, name)
-	cmd := []string{"tar", "-czvf", archivePath, path}
-	_, _, code, err := c.Execute(instance, cmd, false)
+	archivePath := fmt.Sprintf("%s/%s-archive.tar.gz", dir, parentDirName)
+	cmd := []string{"tar", "-czvf", archivePath, parentDirName}
+
+	_, _, code, err := c.Execute(instance, cmd, ExecOptions{
+		pwd: grandparentDir,
+		quiet: true,
+		sudo: false,
+	})
 	if err != nil || code != 0 {
-		return "", err
+		return "", "", err
 	}
-	return archivePath, nil
+	return archivePath, parentDirName, nil
 }
 
 // StartInstance starts an instance that was previously created in the client

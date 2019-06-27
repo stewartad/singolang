@@ -7,6 +7,20 @@ import (
 	"github.com/stewartad/singolang/utils"
 )
 
+type ExecOptions struct {
+	pwd string
+	quiet bool
+	sudo bool
+}
+
+func DefaultExecOptions() ExecOptions {
+	return ExecOptions{
+		pwd: "",
+		quiet: true,
+		sudo: true,
+	}
+}
+
 type existError struct {
 	instance string
 }
@@ -16,7 +30,7 @@ func (e *existError) Error() string {
 }
 
 // Execute runs a command inside a container
-func (c *Client) Execute(instance string, command []string, quiet bool) (string, string, int, error) {
+func (c *Client) Execute(instance string, command []string, opts ExecOptions) (string, string, int, error) {
 	// TODO: check install
 
 	cmd := utils.InitCommand("exec")
@@ -39,10 +53,14 @@ func (c *Client) Execute(instance string, command []string, quiet bool) (string,
 	// TODO: sudo/writable
 
 	// splitCommand := strings.Split(command, " ")
+	if opts.pwd != "" {
+		cmd = append(cmd, "--pwd", opts.pwd)
+	}
+
 	cmd = append(cmd, i.image)
 	cmd = append(cmd, command...)
 
-	stdout, stderr, status, err := utils.RunCommand(cmd, false, quiet)
+	stdout, stderr, status, err := utils.RunCommand(cmd, false, opts.quiet)
 	// TODO: use status
 	_ = status
 	if err != nil {
