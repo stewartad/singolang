@@ -6,6 +6,10 @@ import (
 	"log"
 	"path/filepath"
 	"strings"
+	"io/ioutil"
+	"compress/gzip"
+	"bytes"
+	"archive/tar"
 )
 
 type instanceError struct {
@@ -56,43 +60,33 @@ func (c *Client) NewInstance(image string, name string) error {
 }
 
 // CopyTarball creates a Tar archive of a directory or file and places it in /tmp. 
-// It returns the path to the archive, and the name of the parent folder inside
-func (c *Client) CopyTarball(instance string, path string) (string, string, error) {
-	
+// It returns the path to the archive, and a reader for the archive
+func (c *Client) CopyTarball(instance string, path string) (string, *tar.Reader, error) {
+	// Make directory for archive and set up filepath
 	parentDir := filepath.Dir(path)
-	parentDirName := filepath.Base(parentDir)
-	grandparentDir := filepath.Dir(parentDir)
-	fmt.Println(parentDir)
-	fmt.Println(filepath.Base(parentDir))
-
 	dir := fmt.Sprintf("/tmp/%s", instance)
 	utils.Mkdirp(dir)
-	archivePath := fmt.Sprintf("%s/%s-archive.tar.gz", dir, parentDirName)
-	cmd := []string{"tar", "-czvf", archivePath, parentDirName}
+	archivePath := fmt.Sprintf("%s/%s-archive.tar.gz", dir, filepath.Base(parentDir))
 
-	_, _, code, err := c.Execute(instance, cmd, ExecOptions{
-		pwd: grandparentDir,
-		quiet: true,
-		sudo: false,
-	})
+	// Create archive
+	cmd := []string{"tar", "-czvf", archivePath, path}
+	_, _, code, err := c.Execute(instance, cmd, DefaultExecOptions())
 	if err != nil || code != 0 {
-		return "", "", err
+		return "", nil, err
 	}
-	return archivePath, parentDirName, nil
-}
 
-// StartInstance starts an instance that was previously created in the client
-// TODO: Define custom errors
-// func (c *Client) StartInstance(name string) error {
-// 	fmt.Printf("Starting Instance %s...\n", name)
-// 	err := i.start(false)
-// 	if err != nil {
-// 		fmt.Printf("FAILED\n")
-// 	} else {
-// 		fmt.Printf("SUCCESS. %s\n", i)
-// 	}
-// 	return err
-// }
+	// Create reader for archive
+	b, err := ioutil.ReadFile(archivePath)
+	if err != nil {
+		panic(fmt.Sprintf("Could not read file %s", err))
+	}
+	gzr, err := gzip.NewReader(bytes.NewReader(b))
+	if err != nil {
+		panic("READ ERROR")
+	}
+
+	return archivePath, tar.NewReader(gzr), nil
+}
 
 // StopInstance stops an instance previously created in the client
 // TODO: Define custom errors
