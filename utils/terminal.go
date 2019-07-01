@@ -24,8 +24,7 @@ func InitCommand(args ...string) []string {
 	cmd - a slice of strings, of which the first element must be the command name
 		all subsequent elements are the arguments
 	sudo - set to True to run command as su
-	quiet - set to True to not print stdout to the screen
-		note that stderr will always print to screen
+	quiet - set to True to not print stdout or stderr to the screen
 */
 func RunCommand(cmd []string, sudo bool, quiet bool) (bytes.Buffer, bytes.Buffer, int, error) {
 	// add sudo to front of command if requested
@@ -55,14 +54,16 @@ func RunCommand(cmd []string, sudo bool, quiet bool) (bytes.Buffer, bytes.Buffer
 	var errStdout, errStderr error
 	var outWriter, errWriter io.Writer
 	if quiet {
-		// only write stdout to buffer, bot to screen
+		// only write stdout to buffer, not to screen
 		outWriter = io.Writer(&stdoutBuf)
+		errWriter = io.Writer(&stderrBuf)
 	} else {
 		// write stdout to both buffer and screen
 		outWriter = io.MultiWriter(os.Stdout, &stdoutBuf)
+		// write stderr to both buffer and screen
+		errWriter = io.MultiWriter(os.Stderr, &stderrBuf)
 	}
-	// write stderr to both buffer and screen
-	errWriter = io.MultiWriter(os.Stderr, &stderrBuf)
+	
 
 	// capture stdout concurrently
 	var wg sync.WaitGroup
