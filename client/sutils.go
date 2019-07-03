@@ -15,13 +15,12 @@ func setenv() {
 
 }
 
-func GetFilename(image string, ext string, pwd bool) string{
+func GetFilename(image string, ext string) string{
 	if ext == "" {
 		ext = "sif"
 	}
-	if pwd {
-		image = filepath.Base(image)
-	}
+
+	image = filepath.Base(image)
 	match, err := regexp.Compile("^.*//")
 	if err != nil {
 		// TODO: Better error handling
@@ -30,7 +29,11 @@ func GetFilename(image string, ext string, pwd bool) string{
 	image = match.ReplaceAllString(image, "")
 
 	if !strings.HasSuffix(image, ext) {
-		image = strings.Join([]string{image, ext}, ".")
+		if strings.HasPrefix(ext, ".") {
+			image = strings.Join([]string{image, ext}, "")
+		} else {
+			image = strings.Join([]string{image, ext}, ".")
+		}
 	}
 
 	return image

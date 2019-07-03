@@ -17,6 +17,7 @@ func main() {
 	fmt.Printf("Singularity Version: %s\n", utils.GetSingularityVersion())
 
 	execute := false
+	archive := false
 
 	// instantiate a new client and defer its teardown function
 	cl, finish := client.NewClient()
@@ -42,16 +43,22 @@ func main() {
 
 		stdout, stderr, code, err = cl.Execute("lolcow3", []string{"which", "lolcat"}, opts)
 		fmt.Printf("%s\n%s\n%d\t%s\n", stdout, stderr, code, err)
+
+		stdout, stderr, code, err = cl.Execute("lolcow3", []string{"env", "|", "grep", "HOME"}, opts)
+		fmt.Printf("%s\n%s\n%d\t%s\n", stdout, stderr, code, err)
 	}
 
-	TarFile(cl, "lolcow3", "/usr/games/")
-	TarFile(cl, "lolcow3", "/usr/games/cowsay")
+	if archive {
+		TarFile(cl, "lolcow3", "/usr/games/")
+		TarFile(cl, "lolcow3", "/usr/games/cowsay")
+	}
+	
 
-	// List client's stored images
-	cl.ListInstances()
+	// // List client's stored images
+	// cl.ListInstances()
 
-	// List all running singularity images
-	client.ListAllInstances()
+	// // List all running singularity images
+	// client.ListAllInstances()
 }
 
 func TarFile(cl *client.Client, instance string, target string) {

@@ -20,15 +20,29 @@ func InitCommand(args ...string) []string {
 	return cmd
 }
 
+type RunCommandOptions struct {
+	Sudo 		bool
+	Quietout	bool
+	Quieterr	bool
+}
+
+func DefaultRunCommandOptions() *RunCommandOptions {
+	return &RunCommandOptions{
+		Sudo: false,
+		Quietout: false,
+		Quieterr: false,
+	}
+}
+
 /*RunCommand runs a terminal command
 	cmd - a slice of strings, of which the first element must be the command name
 		all subsequent elements are the arguments
 	sudo - set to True to run command as su
 	quiet - set to True to not print stdout or stderr to the screen
 */
-func RunCommand(cmd []string, sudo bool, quiet bool) (bytes.Buffer, bytes.Buffer, int, error) {
+func RunCommand(cmd []string, opts *RunCommandOptions) (bytes.Buffer, bytes.Buffer, int, error) {
 	// add sudo to front of command if requested
-	if sudo {
+	if opts.Sudo {
 		cmd = append([]string{"sudo"}, cmd...)
 	}
 	name := cmd[0]
@@ -53,13 +67,17 @@ func RunCommand(cmd []string, sudo bool, quiet bool) (bytes.Buffer, bytes.Buffer
 
 	var errStdout, errStderr error
 	var outWriter, errWriter io.Writer
-	if quiet {
+	if opts.Quietout {
 		// only write stdout to buffer, not to screen
 		outWriter = io.Writer(&stdoutBuf)
-		errWriter = io.Writer(&stderrBuf)
 	} else {
 		// write stdout to both buffer and screen
 		outWriter = io.MultiWriter(os.Stdout, &stdoutBuf)
+	}
+	if opts.Quieterr {
+		// only write stderr to buffer, not to screen
+		errWriter = io.Writer(&stderrBuf)
+	} else {
 		// write stderr to both buffer and screen
 		errWriter = io.MultiWriter(os.Stderr, &stderrBuf)
 	}
@@ -105,7 +123,7 @@ func RunCommand(cmd []string, sudo bool, quiet bool) (bytes.Buffer, bytes.Buffer
 
 // GetSingularityVersion gets installed Singularity version
 func GetSingularityVersion() string {
-	version, _, status, _ := RunCommand([]string{"singularity", "--version"}, false, true)
+	version, _, status, _ := RunCommand([]string{"singularity", "--version"}, DefaultRunCommandOptions())
 	// log.Println(status)
 	if status == 0 {
 		return strings.TrimSpace(string(version.Bytes()))

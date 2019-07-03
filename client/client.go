@@ -4,12 +4,7 @@ import (
 	"fmt"
 	"github.com/stewartad/singolang/utils"
 	"log"
-	"path/filepath"
 	"strings"
-	"io/ioutil"
-	"compress/gzip"
-	"bytes"
-	"archive/tar"
 )
 
 type instanceError struct {
@@ -25,6 +20,11 @@ func (e *instanceError) Error() string {
 type Client struct {
 	simage    string // this will be assigned by the load() function
 	instances map[string]*Instance
+}
+
+type SingularityOptions struct {
+	cleanenv bool
+	sudo bool
 }
 
 // NewClient creates and returns a new client as well as a teardown function.
@@ -59,48 +59,10 @@ func (c *Client) NewInstance(image string, name string) error {
 	return nil
 }
 
-// CopyTarball creates a Tar archive of a directory or file and places it in /tmp. 
-// It returns the path to the archive, and a reader for the archive
-func (c *Client) CopyTarball(instance string, path string) (string, *tar.Reader, error) {
-	// Make directory for archive and set up filepath
-	path = filepath.Clean(path)
-	file := filepath.Base(path)
-	parentDir := filepath.Dir(path)
-	// fmt.Printf("%s\t%s\t%s\n", path, file, parentDir)
-	dir := fmt.Sprintf("/tmp/%s", instance)
-	utils.Mkdirp(dir)
-	archivePath := fmt.Sprintf("%s/%s-archive.tar.gz", dir, filepath.Base(parentDir))
-
-	// Create archive
-	cmd := []string{"tar", "-C", parentDir, "-czvf", archivePath, file}
-	_, _, code, err := c.Execute(instance, cmd, DefaultExecOptions())
-	if err != nil || code != 0 {
-		return "", nil, err
-	}
-
-	// Create reader for archive
-	b, err := ioutil.ReadFile(archivePath)
-	if err != nil {
-		panic(fmt.Sprintf("Could not read file %s", err))
-	}
-	gzr, err := gzip.NewReader(bytes.NewReader(b))
-	if err != nil {
-		panic("READ ERROR")
-	}
-
-	return archivePath, tar.NewReader(gzr), nil
-}
-
 // StopInstance stops an instance previously created in the client
 // TODO: Define custom errors
 func (c *Client) StopInstance(name string) error {
-	// fmt.Printf("Stopping Instance %s...", name)
 	err := c.instances[name].stop(false)
-	if err != nil {
-		// fmt.Printf("FAILED\n")
-	} else {
-		// fmt.Printf("\n")
-	}
 	return err
 }
 
@@ -132,7 +94,7 @@ func (c *Client) ListInstances() {
 func ListAllInstances() {
 	cmd := utils.InitCommand("instance", "list")
 
-	output, stderr, status, err := utils.RunCommand(cmd, false, false)
+	output, stderr, status, err := utils.RunCommand(cmd, utils.DefaultRunCommandOptions())
 	// TODO: do something with these values
 	_, _, _ = output, status, stderr
 	if err != nil {

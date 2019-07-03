@@ -13,8 +13,8 @@ type ExecOptions struct {
 	sudo bool
 }
 
-func DefaultExecOptions() ExecOptions {
-	return ExecOptions{
+func DefaultExecOptions() *ExecOptions {
+	return &ExecOptions{
 		pwd: "",
 		quiet: true,
 		sudo: true,
@@ -29,8 +29,26 @@ func (e *existError) Error() string {
 	return fmt.Sprintf("%s is not a loaded instance", e.instance)
 }
 
+func convertOptions(e *ExecOptions) *utils.RunCommandOptions {
+	su := e.sudo
+	var suppressout bool
+	var suppresserr bool
+	if e.quiet {
+		suppressout = true
+		suppresserr = true
+	} else {
+		suppressout = false
+		suppresserr = false
+	}
+	return &utils.RunCommandOptions {
+		Sudo: su,
+		Quieterr: suppresserr,
+		Quietout: suppressout,		
+	}
+}
+
 // Execute runs a command inside a container
-func (c *Client) Execute(instance string, command []string, opts ExecOptions) (string, string, int, error) {
+func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (string, string, int, error) {
 	// TODO: check install
 
 	cmd := utils.InitCommand("exec")
@@ -52,7 +70,6 @@ func (c *Client) Execute(instance string, command []string, opts ExecOptions) (s
 
 	// TODO: sudo/writable
 
-	// splitCommand := strings.Split(command, " ")
 	if opts.pwd != "" {
 		cmd = append(cmd, "--pwd", opts.pwd)
 	}
@@ -60,7 +77,7 @@ func (c *Client) Execute(instance string, command []string, opts ExecOptions) (s
 	cmd = append(cmd, i.image)
 	cmd = append(cmd, command...)
 
-	stdout, stderr, status, err := utils.RunCommand(cmd, false, opts.quiet)
+	stdout, stderr, status, err := utils.RunCommand(cmd, convertOptions(opts))
 	// TODO: use status
 	_ = status
 	if err != nil {

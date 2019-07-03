@@ -17,6 +17,12 @@ type Instance struct {
 	metadata []string // might go unused
 }
 
+var instanceOpts utils.RunCommandOptions = utils.RunCommandOptions {
+	Sudo: false,
+	Quietout: true,
+	Quieterr: true,
+}
+
 func (i *Instance) String() string {
 	if i.protocol != "" {
 		return fmt.Sprintf("%s:\\%s", i.protocol, i.image)
@@ -52,9 +58,15 @@ func (i *Instance) updateMetadata() {
 // Does not support startscript args
 func (i *Instance) start(sudo bool) error {
 	cmd := utils.InitCommand("instance", "start")
+
 	cmd = append(cmd, i.imageURI, i.name)
 
-	stdout, stderr, status, err := utils.RunCommand(cmd, sudo, true)
+	// TODO: make this better
+	if stringInSlice("--cleanenv", i.options) {
+		cmd = append(cmd, "--cleanenv")
+	}
+
+	stdout, stderr, status, err := utils.RunCommand(cmd, &instanceOpts)
 		// TODO: use these
 		_, _, _ = stdout, stderr, status
 	return err
@@ -65,10 +77,18 @@ func (i *Instance) stop(sudo bool) error {
 	cmd := utils.InitCommand("instance", "stop")
 	cmd = append(cmd, i.name)
 
-	stdout, stderr, status, err := utils.RunCommand(cmd, sudo, true)
+	stdout, stderr, status, err := utils.RunCommand(cmd, &instanceOpts)
 	// TODO: use these
 	_, _, _ = stdout, stderr, status
 	return err
+}
+
+func (i *Instance) SetEnv() {
+
+}
+
+func (i *Instance) GetEnv() {
+
 }
 
 /*
@@ -91,4 +111,15 @@ func (i *Instance) GetInfo() map[string]string {
 // This slice can immediately be passed into RunCommand() to be ran again
 func (i *Instance) GetCmd() []string {
 	return i.cmd
+}
+
+
+
+func stringInSlice(target string, list []string) bool {
+	for _, s := range list {
+		if s == target {
+			return true
+		}
+	}
+	return false
 }

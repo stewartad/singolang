@@ -5,41 +5,64 @@ import (
 	"path/filepath"
 	"strings"
 	"regexp"
-	"log"
 	"fmt"
 	"os"
 )
 
+type PullOptions struct {
+	name		string
+	ext			string
+	pullfolder	string
+	force		bool
+}
+
+type pullError struct {
+	msg	string
+}
+
+func (e *pullError) Error() string {
+	return e.msg
+}
+
 // Pull pulls image from singularityhub or dockerhub and builds it.
 // It stores the image in pullfolder, naming it name.ext
-func (c *Client) Pull(image string, name string, ext string, pullfolder string) string {
+func (c *Client) Pull(image string, opts *PullOptions) (string, error) {
 	cmd := utils.InitCommand("pull")
+
+	if opts.force {
+		cmd = append(cmd, "-F")
+	}
+
 	match, err := regexp.MatchString("^(shub|docker)://", image)
 	if err != nil {
-		log.Fatalf("Something went wrong")
+		return "", err
 	}
 	if !match {
-		log.Fatalln("Pull only valid for singularity hub and docker hub")
+		return "", &pullError{msg: "Pull only valid for singularity hub and docker hub"}
 	}
 
-	if name == "" {
-		name = GetFilename(image, ext, false)
+	name := opts.name
+
+	if opts.name == "" {
+		name = GetFilename(image, "")
+	}
+	if opts.pullfolder != "" {
+		name = filepath.Join(opts.pullfolder, name)
 	}
 
-	// cmd = append(cmd, "--name")
-	// cmd = append(cmd, name)
-
+	cmd = append(cmd, name)
 	cmd = append(cmd, image)
 
 	fmt.Printf("%s\n", strings.Join(cmd, " "))
 
-	utils.RunCommand(cmd, false, false)
+	utils.RunCommand(cmd, utils.DefaultRunCommandOptions())
 
-	finalImage := filepath.Join(pullfolder, filepath.Base(name))
-	name = finalImage
-	if os.Stat(finalImage); err == nil {
-		fmt.Println(finalImage)
+	finalImage := filepath.Join(opts.pullfolder, filepath.Base(name))
+
+	_, err = os.Stat(finalImage)
+	if err != nil {
+		return "", err
 	}
-
-	return finalImage
+	fmt.Println(finalImage)
+	return finalImage, nil
 }
