@@ -8,6 +8,39 @@ import (
 var testimage = "docker://godlovedc/lolcow"
 var testfilename = "lolcow.sif"
 
+func TestExecute(t *testing.T) {
+	testCases := []struct {
+		desc	string
+		
+	}{
+		{
+			desc: "",
+			
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			
+		})
+	}
+}
+
+func TestInstance(t *testing.T) {
+	testCases := []struct {
+		desc	string
+		
+	}{
+		{
+			desc: "",
+			
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			
+		})
+	}
+}
 
 func TestGetFilename(t *testing.T) {
 	testCases := []struct {

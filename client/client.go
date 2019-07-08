@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"github.com/stewartad/singolang/utils"
 	"log"
 	"strings"
 )
@@ -19,25 +18,26 @@ func (e *instanceError) Error() string {
 // Client is a struct to hold information about the current client
 type Client struct {
 	simage    string // this will be assigned by the load() function
-	instances map[string]*Instance
-}
-
-type SingularityOptions struct {
-	cleanenv bool
-	sudo bool
+	instances map[string]*instance
+	Sudo      bool // either everything or nothing you do is sudo
+	Cleanenv  bool
 }
 
 // NewClient creates and returns a new client as well as a teardown function.
 // Assign this teardown function and defer it to exit cleanly
 func NewClient() (*Client, func(c *Client)) {
-	return &Client{simage: "", instances: make(map[string]*Instance)}, func(c *Client) {
-		c.teardown()
-	}
+	return &Client{
+			simage:    "",
+			instances: make(map[string]*instance),
+			Sudo:      false,
+			Cleanenv:  true,
+		},
+		func(c *Client) { c.teardown() }
 }
 
 // Version returns the version of the system's Singularity installation
 func (c *Client) Version() string {
-	return utils.GetSingularityVersion()
+	return GetSingularityVersion()
 }
 
 func (c *Client) String() string {
@@ -51,7 +51,7 @@ func (c *Client) String() string {
 // NewInstance creates a new instance and adds it to the client, if it is able to be started
 func (c *Client) NewInstance(image string, name string) error {
 	i := getInstance(image, name)
-	err := i.start(false)
+	err := i.start(c.Sudo)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (c *Client) NewInstance(image string, name string) error {
 // StopInstance stops an instance previously created in the client
 // TODO: Define custom errors
 func (c *Client) StopInstance(name string) error {
-	err := c.instances[name].stop(false)
+	err := c.instances[name].stop(c.Sudo)
 	return err
 }
 
@@ -92,9 +92,9 @@ func (c *Client) ListInstances() {
 // ListAllInstances lists all currently running Singularity instances.
 // It is equivalent to running `singularity instance list`
 func ListAllInstances() {
-	cmd := utils.InitCommand("instance", "list")
+	cmd := initCommand("instance", "list")
 
-	output, stderr, status, err := utils.RunCommand(cmd, utils.DefaultRunCommandOptions())
+	output, stderr, status, err := runCommand(cmd, defaultRunCommandOptions())
 	// TODO: do something with these values
 	_, _, _ = output, status, stderr
 	if err != nil {
@@ -107,4 +107,3 @@ func (c *Client) teardown() {
 	c.StopAllInstances()
 	ListAllInstances()
 }
-

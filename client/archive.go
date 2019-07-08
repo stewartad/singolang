@@ -7,7 +7,6 @@ import (
 	"compress/gzip"
 	"io/ioutil"
 	"bytes"
-	"github.com/stewartad/singolang/utils"
 )
 
 // CopyTarball creates a Tar archive of a directory or file and places it in /tmp. 
@@ -19,7 +18,7 @@ func (c *Client) CopyTarball(instance string, path string) (string, *tar.Reader,
 	parentDir := filepath.Dir(path)
 	// fmt.Printf("%s\t%s\t%s\n", path, file, parentDir)
 	dir := fmt.Sprintf("/tmp/%s", instance)
-	utils.Mkdirp(dir)
+	Mkdirp(dir)
 	archivePath := fmt.Sprintf("%s/%s-archive.tar.gz", dir, filepath.Base(parentDir))
 
 	// Create archive

@@ -2,12 +2,11 @@ package client
 
 import (
 	"fmt"
-	"github.com/stewartad/singolang/utils"
 	"strings"
 )
 
-// Instance holds information about a currently running image Instance
-type Instance struct {
+// instance holds information about a currently running image instance
+type instance struct {
 	name     string
 	imageURI string
 	protocol string
@@ -17,13 +16,13 @@ type Instance struct {
 	metadata []string // might go unused
 }
 
-var instanceOpts utils.RunCommandOptions = utils.RunCommandOptions {
-	Sudo: false,
-	Quietout: true,
-	Quieterr: true,
+var instanceOpts = runCommandOptions{
+	sudo:     false,
+	quietout: true,
+	quieterr: true,
 }
 
-func (i *Instance) String() string {
+func (i *instance) String() string {
 	if i.protocol != "" {
 		return fmt.Sprintf("%s:\\%s", i.protocol, i.image)
 	}
@@ -31,8 +30,8 @@ func (i *Instance) String() string {
 }
 
 // GetInstance returns a new Instance with image information
-func getInstance(image string, name string, options ...string) *Instance {
-	i := new(Instance)
+func getInstance(image string, name string, options ...string) *instance {
+	i := new(instance)
 	i.parseImageName(image)
 
 	if name != "" {
@@ -44,20 +43,20 @@ func getInstance(image string, name string, options ...string) *Instance {
 }
 
 // parseImageName processes the image name and protocol
-func (i *Instance) parseImageName(image string) {
+func (i *instance) parseImageName(image string) {
 	i.imageURI = image
-	i.protocol, i.image = utils.SplitURI(image)
+	i.protocol, i.image = SplitURI(image)
 }
 
 // TODO: make this do something
-func (i *Instance) updateMetadata() {
+func (i *instance) updateMetadata() {
 
 }
 
 // Start starts an instance
 // Does not support startscript args
-func (i *Instance) start(sudo bool) error {
-	cmd := utils.InitCommand("instance", "start")
+func (i *instance) start(sudo bool) error {
+	cmd := initCommand("instance", "start")
 
 	cmd = append(cmd, i.imageURI, i.name)
 
@@ -66,28 +65,28 @@ func (i *Instance) start(sudo bool) error {
 		cmd = append(cmd, "--cleanenv")
 	}
 
-	stdout, stderr, status, err := utils.RunCommand(cmd, &instanceOpts)
-		// TODO: use these
-		_, _, _ = stdout, stderr, status
-	return err
-}
-
-// Stop stops an instance.
-func (i *Instance) stop(sudo bool) error {
-	cmd := utils.InitCommand("instance", "stop")
-	cmd = append(cmd, i.name)
-
-	stdout, stderr, status, err := utils.RunCommand(cmd, &instanceOpts)
+	stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
 	// TODO: use these
 	_, _, _ = stdout, stderr, status
 	return err
 }
 
-func (i *Instance) SetEnv() {
+// Stop stops an instance.
+func (i *instance) stop(sudo bool) error {
+	cmd := initCommand("instance", "stop")
+	cmd = append(cmd, i.name)
+
+	stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
+	// TODO: use these
+	_, _, _ = stdout, stderr, status
+	return err
+}
+
+func (i *instance) SetEnv() {
 
 }
 
-func (i *Instance) GetEnv() {
+func (i *instance) GetEnv() {
 
 }
 
@@ -96,7 +95,7 @@ func (i *Instance) GetEnv() {
  */
 
 // GetInfo returns the information about an Instance
-func (i *Instance) GetInfo() map[string]string {
+func (i *instance) GetInfo() map[string]string {
 	m := make(map[string]string)
 	m["name"] = i.name
 	m["imageURI"] = i.imageURI
@@ -109,11 +108,9 @@ func (i *Instance) GetInfo() map[string]string {
 
 // GetCmd returns a slice of strings that represent the full command created when i.Start() was called.
 // This slice can immediately be passed into RunCommand() to be ran again
-func (i *Instance) GetCmd() []string {
+func (i *instance) GetCmd() []string {
 	return i.cmd
 }
-
-
 
 func stringInSlice(target string, list []string) bool {
 	for _, s := range list {

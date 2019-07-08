@@ -8,16 +8,14 @@ import (
 	"io"
 
 	"github.com/stewartad/singolang/client"
-	"github.com/stewartad/singolang/utils"
 )
 
 func main() {
-	fmt.Println(os.Args[0])
-	fmt.Println("hello world")
-	fmt.Printf("Singularity Version: %s\n", utils.GetSingularityVersion())
+	fmt.Println("Singolang Version 0.0.1")
+	fmt.Printf("Singularity Version: %s\n", client.GetSingularityVersion())
 
-	execute := false
-	archive := false
+	execute := true
+	archive := true
 
 	// instantiate a new client and defer its teardown function
 	cl, finish := client.NewClient()
@@ -33,7 +31,7 @@ func main() {
 	opts := client.DefaultExecOptions()
 
 	// Run some executes
-	if execute {	
+	if execute {
 		stdout, stderr, code, err := cl.Execute("lolcow3", []string{"which", "fortune"}, opts)
 		fmt.Printf("%s\n%s\n%d\t%s\n", stdout, stderr, code, err)
 
@@ -53,12 +51,11 @@ func main() {
 		TarFile(cl, "lolcow3", "/usr/games/cowsay")
 	}
 	
+	// List client's stored images
+	cl.ListInstances()
 
-	// // List client's stored images
-	// cl.ListInstances()
-
-	// // List all running singularity images
-	// client.ListAllInstances()
+	// List all running singularity images
+	client.ListAllInstances()
 }
 
 func TarFile(cl *client.Client, instance string, target string) {

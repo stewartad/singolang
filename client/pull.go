@@ -1,7 +1,6 @@
 package client
 
 import (
-	"github.com/stewartad/singolang/utils"
 	"path/filepath"
 	"strings"
 	"regexp"
@@ -9,9 +8,10 @@ import (
 	"os"
 )
 
+// PullOptions provide a set of options to configure the pull command. 
+// 
 type PullOptions struct {
 	name		string
-	ext			string
 	pullfolder	string
 	force		bool
 }
@@ -27,7 +27,7 @@ func (e *pullError) Error() string {
 // Pull pulls image from singularityhub or dockerhub and builds it.
 // It stores the image in pullfolder, naming it name.ext
 func (c *Client) Pull(image string, opts *PullOptions) (string, error) {
-	cmd := utils.InitCommand("pull")
+	cmd := initCommand("pull")
 
 	if opts.force {
 		cmd = append(cmd, "-F")
@@ -55,7 +55,7 @@ func (c *Client) Pull(image string, opts *PullOptions) (string, error) {
 
 	fmt.Printf("%s\n", strings.Join(cmd, " "))
 
-	utils.RunCommand(cmd, utils.DefaultRunCommandOptions())
+	runCommand(cmd, defaultRunCommandOptions())
 
 	finalImage := filepath.Join(opts.pullfolder, filepath.Base(name))
 

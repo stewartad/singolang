@@ -1,23 +1,20 @@
 package client
 
 import (
-	_"strings"
+	"strings"
 	"fmt"
 	_"os"
-	"github.com/stewartad/singolang/utils"
 )
 
 type ExecOptions struct {
-	pwd string
-	quiet bool
-	sudo bool
+	pwd 		string
+	quiet 		bool
 }
 
 func DefaultExecOptions() *ExecOptions {
 	return &ExecOptions{
-		pwd: "",
-		quiet: true,
-		sudo: true,
+		pwd: 		"",
+		quiet: 		true,
 	}
 }
 
@@ -29,59 +26,43 @@ func (e *existError) Error() string {
 	return fmt.Sprintf("%s is not a loaded instance", e.instance)
 }
 
-func convertOptions(e *ExecOptions) *utils.RunCommandOptions {
-	su := e.sudo
-	var suppressout bool
-	var suppresserr bool
-	if e.quiet {
-		suppressout = true
-		suppresserr = true
-	} else {
-		suppressout = false
-		suppresserr = false
-	}
-	return &utils.RunCommandOptions {
-		Sudo: su,
-		Quieterr: suppresserr,
-		Quietout: suppressout,		
-	}
-}
-
 // Execute runs a command inside a container
 func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (string, string, int, error) {
 	// TODO: check install
 
-	cmd := utils.InitCommand("exec")
+	cmd := initCommand("exec")
 
-	i, e := c.instances[instance]
-	if !e {
+	_, exists := c.instances[instance]
+	if !exists {
 		return "", "", -1, &existError{instance} 
 	}
 
-	// --nv for graphics card drivers
-
-	// use client's loaded instance by default
-
-	// if instance, use its uri
-
 	// TODO: bind paths
-	
-	// TODO: run an app
-
-	// TODO: sudo/writable
 
 	if opts.pwd != "" {
 		cmd = append(cmd, "--pwd", opts.pwd)
 	}
 
-	cmd = append(cmd, i.image)
-	cmd = append(cmd, command...)
+	var image string
+	if !strings.HasPrefix(instance, "instance://") {
+		image = strings.Join([]string{"instance://", instance}, "")
+	} else {
+		image = instance
+	}
 
-	stdout, stderr, status, err := utils.RunCommand(cmd, convertOptions(opts))
+	cmd = append(cmd, image)
+	cmd = append(cmd, command...)
+	fmt.Println(image)
+	fmt.Println(cmd)
+
+	stdout, stderr, status, err := runCommand(cmd, &runCommandOptions {
+		sudo: c.Sudo,
+		quieterr: opts.quiet,
+		quietout: opts.quiet,		
+	})
 	// TODO: use status
 	_ = status
 	if err != nil {
-		// fmt.Fprintf(os.Stderr, "Error running command: %s\n", strings.Join(cmd, " "))
 		return string(stdout.Bytes()), string(stderr.Bytes()), -1, err
 	}
 	return string(stdout.Bytes()), string(stderr.Bytes()), 0, nil
