@@ -52,8 +52,6 @@ func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (
 
 	cmd = append(cmd, image)
 	cmd = append(cmd, command...)
-	fmt.Println(image)
-	fmt.Println(cmd)
 
 	stdout, stderr, status, err := runCommand(cmd, &runCommandOptions {
 		sudo: c.Sudo,
