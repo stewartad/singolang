@@ -58,6 +58,7 @@ func main() {
 	client.ListAllInstances()
 }
 
+// TarFile creates a tar from the container
 func TarFile(cl *client.Client, instance string, target string) {
 	// need to make this work for both directories and files
 	t, read, err := cl.CopyTarball(instance, target)
