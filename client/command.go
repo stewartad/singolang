@@ -1,42 +1,42 @@
 package client
 
 import (
+	"bytes"
+	"io"
 	"log"
 	"os"
 	"os/exec"
-	"syscall"
-	"io"
-	"bytes"
 	"sync"
+	"syscall"
 )
 
 // InitCommand creates a slice of strings of which the first element is "singularity" followed by all args
 func initCommand(args ...string) []string {
 	cmd := []string{"singularity"}
 	cmd = append(cmd, args...)
-	// append quiet or debug if flags are set in client 
+	// append quiet or debug if flags are set in client
 	return cmd
 }
 
 type runCommandOptions struct {
-	sudo 		bool
-	quietout	bool
-	quieterr	bool
+	sudo     bool
+	quietout bool
+	quieterr bool
 }
 
-// 
+//
 func defaultRunCommandOptions() *runCommandOptions {
 	return &runCommandOptions{
-		sudo: false,
+		sudo:     false,
 		quietout: false,
 		quieterr: false,
 	}
 }
 
 /*RunCommand runs a terminal command
-	cmd - a slice of strings, of which the first element must be the command name
-		all subsequent elements are the arguments
-	opts - runCommandOptions struct defining options to be used
+cmd - a slice of strings, of which the first element must be the command name
+	all subsequent elements are the arguments
+opts - runCommandOptions struct defining options to be used
 */
 func runCommand(cmd []string, opts *runCommandOptions) (bytes.Buffer, bytes.Buffer, int, error) {
 	// add sudo to front of command if requested
@@ -79,7 +79,6 @@ func runCommand(cmd []string, opts *runCommandOptions) (bytes.Buffer, bytes.Buff
 		// write stderr to both buffer and screen
 		errWriter = io.MultiWriter(os.Stderr, &stderrBuf)
 	}
-	
 
 	// capture stdout concurrently
 	var wg sync.WaitGroup
@@ -104,11 +103,10 @@ func runCommand(cmd []string, opts *runCommandOptions) (bytes.Buffer, bytes.Buff
 			waitStatus = exitError.Sys().(syscall.WaitStatus)
 			// log.Printf("Command failed with %s\n", err)
 			return stdoutBuf, stderrBuf, waitStatus.ExitStatus(), err
-		} 
+		}
 		// log.Printf("Unknown Error, Exit Status: %s", err)
 	}
 
-	
 	waitStatus = process.ProcessState.Sys().(syscall.WaitStatus)
 	if errStdout != nil || errStderr != nil {
 		log.Printf("Failed to capture strout or stderr")

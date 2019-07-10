@@ -1,15 +1,15 @@
 package client
 
 import (
-	"path/filepath"
 	"archive/tar"
-	"fmt"
-	"compress/gzip"
-	"io/ioutil"
 	"bytes"
+	"compress/gzip"
+	"fmt"
+	"io/ioutil"
+	"path/filepath"
 )
 
-// CopyTarball creates a Tar archive of a directory or file and places it in /tmp. 
+// CopyTarball creates a Tar archive of a directory or file and places it in /tmp.
 // It returns the path to the archive, and a reader for the archive
 func (c *Client) CopyTarball(instance string, path string) (string, *tar.Reader, error) {
 	// Make directory for archive and set up filepath

@@ -1,21 +1,21 @@
 package client
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 )
 
 // ExecOptions provide flags simulating options int he singularity command line
 type ExecOptions struct {
-	pwd 		string
-	quiet 		bool
+	pwd   string
+	quiet bool
 }
 
 // DefaultExecOptions provides a default options struct
 func DefaultExecOptions() *ExecOptions {
 	return &ExecOptions{
-		pwd: 		"",
-		quiet: 		true,
+		pwd:   "",
+		quiet: true,
 	}
 }
 
@@ -35,7 +35,7 @@ func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (
 
 	_, exists := c.instances[instance]
 	if !exists {
-		return "", "", -1, &existError{instance} 
+		return "", "", -1, &existError{instance}
 	}
 
 	// TODO: bind paths
@@ -54,8 +54,8 @@ func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (
 	cmd = append(cmd, image)
 	cmd = append(cmd, command...)
 
-	stdout, stderr, status, err := runCommand(cmd, &runCommandOptions {
-		sudo: c.Sudo,
+	stdout, stderr, status, err := runCommand(cmd, &runCommandOptions{
+		sudo:     c.Sudo,
 		quieterr: opts.quiet,
 		quietout: opts.quiet,
 	})
@@ -66,5 +66,5 @@ func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (
 	}
 
 	return string(stdout.Bytes()), string(stderr.Bytes()), 0, nil
-	
+
 }

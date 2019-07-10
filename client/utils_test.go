@@ -1,8 +1,8 @@
 package client
 
 import (
-	"testing"
 	"strings"
+	"testing"
 )
 
 var TestPath = "docker://vsoch/hello-world"

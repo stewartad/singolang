@@ -2,8 +2,8 @@ package client
 
 import (
 	"os"
-	"testing"
 	"strings"
+	"testing"
 )
 
 var testPull = "docker://godlovedc/lolcow"
@@ -28,28 +28,28 @@ func TestExecute(t *testing.T) {
 			expErr:  false,
 		},
 		{
-			desc: 	"exit error",
-			cmd: 	[]string{"grep"},
+			desc:    "exit error",
+			cmd:     []string{"grep"},
 			expSout: "",
 			expSerr: "Usage:",
 			expCode: -1,
-			expErr:	 true,
+			expErr:  true,
 		},
 		{
-			desc: 	"non-zero return",
-			cmd: 	[]string{"false"},
+			desc:    "non-zero return",
+			cmd:     []string{"false"},
 			expSout: "",
 			expSerr: "",
 			expCode: -1,
-			expErr:	 true,
+			expErr:  true,
 		},
 		{
-			desc: 	"zero return",
-			cmd: 	[]string{"true"},
+			desc:    "zero return",
+			cmd:     []string{"true"},
 			expSout: "",
 			expSerr: "",
 			expCode: 0,
-			expErr:	 false,
+			expErr:  false,
 		},
 	}
 
@@ -59,7 +59,6 @@ func TestExecute(t *testing.T) {
 		t.Errorf("Error creating insctance")
 	}
 	defer teardown(c)
-
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
@@ -75,11 +74,10 @@ func TestExecute(t *testing.T) {
 			} else if err != nil && !tC.expErr {
 				t.Errorf("Unexpected Error")
 			}
-			
+
 		})
 	}
 
-	
 }
 
 func TestInstance(t *testing.T) {

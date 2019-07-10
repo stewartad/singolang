@@ -1,23 +1,23 @@
 package client
 
 import (
-	"path/filepath"
-	"strings"
-	"regexp"
 	"fmt"
 	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
 )
 
-// PullOptions provide a set of options to configure the pull command. 
-// 
+// PullOptions provide a set of options to configure the pull command.
+//
 type PullOptions struct {
-	name		string
-	pullfolder	string
-	force		bool
+	name       string
+	pullfolder string
+	force      bool
 }
 
 type pullError struct {
-	msg	string
+	msg string
 }
 
 func (e *pullError) Error() string {

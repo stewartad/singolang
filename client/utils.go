@@ -1,10 +1,10 @@
 package client
 
 import (
-	"path/filepath"
-	"regexp"
 	"log"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -17,7 +17,7 @@ func setenv() {
 }
 
 // GetFilename creates the filename of an image being pulled
-func GetFilename(image string, ext string) string{
+func GetFilename(image string, ext string) string {
 	if ext == "" {
 		ext = "sif"
 	}
@@ -42,7 +42,7 @@ func GetFilename(image string, ext string) string{
 }
 
 func getURI() {
-	
+
 }
 
 // Mkdirp simulates mkdir -p UNIX command

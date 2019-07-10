@@ -3,9 +3,9 @@ package main
 import (
 	"archive/tar"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
-	"io"
 
 	"github.com/stewartad/singolang/client"
 )
@@ -50,7 +50,7 @@ func main() {
 		TarFile(cl, "lolcow3", "/usr/games/")
 		TarFile(cl, "lolcow3", "/usr/games/cowsay")
 	}
-	
+
 	// List client's stored images
 	cl.ListInstances()
 
