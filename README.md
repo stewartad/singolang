@@ -23,10 +23,11 @@ defer teardown()
 
 ```go
 pullOpts := &client.PullOptions{
-	Name: "",
+    Name: "",
 	Pullfolder: filepath.Join("/tmp", "pull"),
 	Force: false,
-	}
+}
+
 imgPath, err := cl.Pull("docker://godlovedc/lolcow", pullOpts)
 
 if err != nil {
