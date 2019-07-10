@@ -16,6 +16,7 @@ func setenv() {
 
 }
 
+// GetFilename creates the filename of an image being pulled
 func GetFilename(image string, ext string) string{
 	if ext == "" {
 		ext = "sif"

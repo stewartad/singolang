@@ -3,14 +3,15 @@ package client
 import (
 	"strings"
 	"fmt"
-	_"os"
 )
 
+// ExecOptions provide flags simulating options int he singularity command line
 type ExecOptions struct {
 	pwd 		string
 	quiet 		bool
 }
 
+// DefaultExecOptions provides a default options struct
 func DefaultExecOptions() *ExecOptions {
 	return &ExecOptions{
 		pwd: 		"",
@@ -56,13 +57,14 @@ func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (
 	stdout, stderr, status, err := runCommand(cmd, &runCommandOptions {
 		sudo: c.Sudo,
 		quieterr: opts.quiet,
-		quietout: opts.quiet,		
+		quietout: opts.quiet,
 	})
 	// TODO: use status
 	_ = status
 	if err != nil {
 		return string(stdout.Bytes()), string(stderr.Bytes()), -1, err
 	}
+
 	return string(stdout.Bytes()), string(stderr.Bytes()), 0, nil
 	
 }

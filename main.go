@@ -42,7 +42,7 @@ func main() {
 		stdout, stderr, code, err = cl.Execute("lolcow3", []string{"which", "lolcat"}, opts)
 		fmt.Printf("%s\n%s\n%d\t%s\n", stdout, stderr, code, err)
 
-		stdout, stderr, code, err = cl.Execute("lolcow3", []string{"env", "|", "grep", "HOME"}, opts)
+		stdout, stderr, code, err = cl.Execute("lolcow3", []string{"echo", "hello"}, opts)
 		fmt.Printf("%s\n%s\n%d\t%s\n", stdout, stderr, code, err)
 	}
 

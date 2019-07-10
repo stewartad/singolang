@@ -106,8 +106,6 @@ func runCommand(cmd []string, opts *runCommandOptions) (bytes.Buffer, bytes.Buff
 			return stdoutBuf, stderrBuf, waitStatus.ExitStatus(), err
 		} 
 		// log.Printf("Unknown Error, Exit Status: %s", err)
-		return stdoutBuf, stderrBuf, -1, err
-		
 	}
 
 	
@@ -115,6 +113,7 @@ func runCommand(cmd []string, opts *runCommandOptions) (bytes.Buffer, bytes.Buff
 	if errStdout != nil || errStderr != nil {
 		log.Printf("Failed to capture strout or stderr")
 	}
+
 	// return stdout and stderr as strings
 	return stdoutBuf, stderrBuf, waitStatus.ExitStatus(), err
 }
