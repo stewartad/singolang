@@ -21,6 +21,15 @@ defer teardown()
 
 ### Pull an image
 
+Pulling an image requires a struct to be filled out detailing the options with which to perform the pull. 
+
+Name is the filename to save the image as.
+
+Pullfolder is the folder to place the final image
+
+Force, if true, will overwrite any existing files of the same name
+
+
 ```go
 pullOpts := &client.PullOptions{
     Name: "",
@@ -35,4 +44,19 @@ if err != nil {
 } else {
     fmt.Println(imgPath)
 }
+```
+
+### Create an Instance
+```go
+err := cl.NewInstance("lolcow_latest.sif", "lolcow3")
+if err != nil {
+    fmt.Println(err)
+}
+```
+
+### Execute a Command
+```go
+opts := client.DefaultExecOptions()
+stdout, stderr, code, err := cl.Execute("lolcow3", []string{"which", "fortune"}, opts)
+		fmt.Printf("%s\n%s\n%d\t%s\n", stdout, stderr, code, err)
 ```
