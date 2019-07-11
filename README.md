@@ -33,7 +33,7 @@ Pullfolder is the folder to place the final image
 Force, if true, will overwrite any existing files of the same name
 
 ```go
-opts := &client.PullOptions{
+opts := &singolang.PullOptions{
     Name: "",
     Pullfolder: filepath.Join("/tmp", "pull"),
     Force: false,
