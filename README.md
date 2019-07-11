@@ -16,7 +16,7 @@ Singolang is a library to interact with Singularity containers in Go. It is mode
 To start using Singolang, create a new client
 
 ```go
-client, teardown := client.NewClient()
+client, teardown := singolang.NewClient()
 defer teardown()
 ```
 
@@ -33,13 +33,13 @@ Pullfolder is the folder to place the final image
 Force, if true, will overwrite any existing files of the same name
 
 ```go
-pullOpts := &client.PullOptions{
+opts := &client.PullOptions{
     Name: "",
     Pullfolder: filepath.Join("/tmp", "pull"),
     Force: false,
 }
 
-imgPath, err := cl.Pull("docker://godlovedc/lolcow", pullOpts)
+imgPath, err := client.Pull("docker://godlovedc/lolcow", pullOpts)
 
 if err != nil {
     fmt.Println(err)
@@ -51,7 +51,7 @@ if err != nil {
 ### Create an Instance
 
 ```go
-err := cl.NewInstance("lolcow_latest.sif", "lolcow3")
+err := client.NewInstance("lolcow_latest.sif", "lolcow3")
 if err != nil {
     fmt.Println(err)
 }
@@ -60,7 +60,7 @@ if err != nil {
 ### Execute a Command
 
 ```go
-opts := client.DefaultExecOptions()
-stdout, stderr, code, err := cl.Execute("lolcow3", []string{"which", "fortune"}, opts)
+opts := singolang.DefaultExecOptions()
+stdout, stderr, code, err := client.Execute("lolcow3", []string{"which", "fortune"}, opts)
 fmt.Printf("%s\n%s\n%d\t%s\n", stdout, stderr, code, err)
 ```
