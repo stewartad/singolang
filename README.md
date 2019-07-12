@@ -1,4 +1,7 @@
 # Singolang
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/stewartad/singolang)](https://goreportcard.com/report/github.com/stewartad/singolang)
+
 Singolang is a library to interact with Singularity containers in Go. It is modeled from Spython. Designed for use with Singularity 3+
 
 # Instance

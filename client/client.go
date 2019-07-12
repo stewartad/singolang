@@ -75,6 +75,14 @@ func (c *Client) StopAllInstances() error {
 	return err
 }
 
+func (c *Client) GetEnv(instance string) map[string]string {
+	return c.instances[instance].getEnv()
+}
+
+func (c *Client) GetEnvVar(instance string, varname string) (string, string) {
+	return c.instances[instance].getEnvVar(varname)
+}
+
 // ListInstances prints all client-created instances to screen
 func (c *Client) ListInstances() {
 	fmt.Println("CLIENT LOADED INSTANCES")

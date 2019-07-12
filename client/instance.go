@@ -11,6 +11,8 @@ type instance struct {
 	imageURI string
 	protocol string
 	image    string
+	cleanenv bool
+	env		 map[string]string
 	cmd      []string
 	options  []string
 	metadata []string // might go unused
@@ -37,6 +39,8 @@ func getInstance(image string, name string, options ...string) *instance {
 	if name != "" {
 		i.name = name
 	}
+	i.cleanenv = true
+	i.env = make(map[string]string)
 
 	i.options = options
 	return i
@@ -60,14 +64,16 @@ func (i *instance) start(sudo bool) error {
 
 	cmd = append(cmd, i.imageURI, i.name)
 
-	// TODO: make this better
-	if stringInSlice("--cleanenv", i.options) {
+	if i.cleanenv {
 		cmd = append(cmd, "--cleanenv")
 	}
 
 	stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
 	// TODO: use these
 	_, _, _ = stdout, stderr, status
+
+	err = i.processEnv()
+
 	return err
 }
 
@@ -82,12 +88,36 @@ func (i *instance) stop(sudo bool) error {
 	return err
 }
 
-func (i *instance) SetEnv() {
+// GetEnvVar retrieves an environment variable
+func (i *instance) getEnvVar(varname string) (string, string) {
+	return varname, i.env[varname]
+}
+
+// SetEnvVar sets an environment variable
+func (i *instance) setEnvVar() {
 
 }
 
-func (i *instance) GetEnv() {
+// ProcessEnv retrieves all env variables in the instance and stores them in a map
+func (i *instance) processEnv() error {
+	cmd := []string{"singularity", "exec", "--cleanenv", fmt.Sprintf("instance://%s", i.name), "env"}
+	stdout, _, _, err := runCommand(cmd, &runCommandOptions{
+		quietout: true,
+		quieterr: true,
+		sudo: false,
+	})
+	if err != nil {
+		return err
+	}
 
+	for _, env := range strings.Split(string(stdout.Bytes()), "\n") {
+		v := strings.Split(env, "=")
+		if len(v) > 1 {
+			i.env[v[0]] = v[1]
+		}
+	}
+
+	return err
 }
 
 /*
@@ -106,17 +136,12 @@ func (i *instance) GetInfo() map[string]string {
 	return m
 }
 
+func (i *instance) getEnv() map[string]string {
+	return i.env
+}
+
 // GetCmd returns a slice of strings that represent the full command created when i.Start() was called.
 // This slice can immediately be passed into RunCommand() to be ran again
 func (i *instance) GetCmd() []string {
 	return i.cmd
-}
-
-func stringInSlice(target string, list []string) bool {
-	for _, s := range list {
-		if s == target {
-			return true
-		}
-	}
-	return false
 }

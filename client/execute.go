@@ -5,17 +5,28 @@ import (
 	"strings"
 )
 
+const senv string = "SINGULARITYENV_"
+
 // ExecOptions provide flags simulating options int he singularity command line
 type ExecOptions struct {
-	pwd   string
-	quiet bool
+	Pwd   string
+	Quiet bool
+	Cleanenv bool
+	EnvVars map[string]string
+	PrependPath []string
+	AppendPath []string
+	ReplacePath	string
 }
 
 // DefaultExecOptions provides a default options struct
 func DefaultExecOptions() *ExecOptions {
 	return &ExecOptions{
-		pwd:   "",
-		quiet: true,
+		Pwd:   "",
+		Quiet: true,
+		Cleanenv: true,
+		EnvVars: make(map[string]string),
+		PrependPath: []string{},
+		AppendPath: []string{},
 	}
 }
 
@@ -40,8 +51,11 @@ func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (
 
 	// TODO: bind paths
 
-	if opts.pwd != "" {
-		cmd = append(cmd, "--pwd", opts.pwd)
+	if opts.Cleanenv {
+		cmd = append(cmd, "--cleanenv")
+	}
+	if opts.Pwd != "" {
+		cmd = append(cmd, "--pwd", opts.Pwd)
 	}
 
 	var image string
@@ -54,10 +68,18 @@ func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (
 	cmd = append(cmd, image)
 	cmd = append(cmd, command...)
 
-	stdout, stderr, status, err := runCommand(cmd, &runCommandOptions{
+	finalcmd := []string{"bash", "-c"}
+	// adding these is causing SEGFAULTS
+	finalcmd = append(finalcmd, opts.processEnvVars()...)
+	finalcmd = append(finalcmd, opts.processPathMod()...)
+	finalcmd = append(finalcmd, cmd...)
+
+	fmt.Println(finalcmd)
+
+	stdout, stderr, status, err := runCommand(finalcmd, &runCommandOptions{
 		sudo:     c.Sudo,
-		quieterr: opts.quiet,
-		quietout: opts.quiet,
+		quieterr: opts.Quiet,
+		quietout: opts.Quiet,
 	})
 	// TODO: use status
 	_ = status
@@ -67,4 +89,29 @@ func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (
 
 	return string(stdout.Bytes()), string(stderr.Bytes()), 0, nil
 
+}
+
+func (opts *ExecOptions) processEnvVars() []string {
+	if len(opts.EnvVars) < 1 {
+		return []string{}
+	}
+	envVarStrings := []string{}
+	for k, v := range opts.EnvVars {
+		envVarStrings = append(envVarStrings, fmt.Sprintf("%s%s=%s", senv, k, v))
+	}
+	return envVarStrings
+}
+
+func (opts *ExecOptions) processPathMod() []string {
+	if len(opts.PrependPath) < 1 || len(opts.AppendPath) < 1 {
+		return []string{}
+	}
+	pathVars := []string{}
+	for _, prepath := range opts.PrependPath {
+		pathVars = append(pathVars, fmt.Sprintf("%sPREPEND_PATH=%s", senv, prepath))
+	}
+	for _, apppath := range opts.AppendPath {
+		pathVars = append(pathVars, fmt.Sprintf("%sAPPEND_PATH=%s", senv, apppath))
+	} 
+	return pathVars
 }
