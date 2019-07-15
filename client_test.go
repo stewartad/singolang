@@ -1,4 +1,4 @@
-package client
+package singolang
 
 import (
 	"os"
@@ -166,9 +166,9 @@ func TestPull(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			opts := PullOptions{
-				name:       tC.file,
-				pullfolder: tC.pulldir,
-				force:      true,
+				Name:       tC.file,
+				Pullfolder: tC.pulldir,
+				Force:      true,
 			}
 			image, err := client.Pull(tC.image, &opts)
 			if err, ok := err.(*pullError); ok && tC.expected == "error" {
