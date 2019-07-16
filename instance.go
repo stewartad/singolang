@@ -20,8 +20,8 @@ type Instance struct {
 
 var instanceOpts = runCommandOptions{
 	sudo:     false,
-	quietout: true,
-	quieterr: true,
+	quietout: false,
+	quieterr: false,
 }
 
 func (i *Instance) String() string {
@@ -72,7 +72,8 @@ func (i *Instance) start(sudo bool) error {
 	// TODO: use these
 	_, _, _ = stdout, stderr, status
 
-	err = i.processEnv()
+	// this was always throwing an error
+	// err = i.processEnv()
 
 	return err
 }
@@ -122,6 +123,7 @@ func (i *Instance) GetInfo() map[string]string {
 	return m
 }
 
+// GetEnv gets the instance environment
 func (i *Instance) GetEnv() *EnvOptions {
 	return i.Env
 }

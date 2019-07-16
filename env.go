@@ -7,6 +7,7 @@ import (
 
 const senv string = "SINGULARITYENV"
 
+// EnvOptions configures the environment with which to run the container
 type EnvOptions struct {
 	EnvVars map[string]string
 	PrependPath []string
@@ -14,6 +15,7 @@ type EnvOptions struct {
 	ReplacePath	string
 }
 
+// DefaultEnvOptions gives a blank env
 func DefaultEnvOptions() *EnvOptions {
 	return &EnvOptions {
 		EnvVars: make(map[string]string),
