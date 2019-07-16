@@ -5,18 +5,15 @@ import (
 	"strings"
 )
 
-const senv string = "SINGULARITYENV_"
-
 // ExecOptions provide flags simulating options int he singularity command line
 type ExecOptions struct {
-	Pwd   string
-	Quiet bool
+	Pwd   	string
+	Quiet	bool
 	Cleanenv bool
-	EnvVars map[string]string
-	PrependPath []string
-	AppendPath []string
-	ReplacePath	string
+	Env		*EnvOptions
 }
+
+
 
 // DefaultExecOptions provides a default options struct
 func DefaultExecOptions() *ExecOptions {
@@ -24,9 +21,7 @@ func DefaultExecOptions() *ExecOptions {
 		Pwd:   "",
 		Quiet: true,
 		Cleanenv: true,
-		EnvVars: make(map[string]string),
-		PrependPath: []string{},
-		AppendPath: []string{},
+		Env: DefaultEnvOptions(),
 	}
 }
 
@@ -39,15 +34,11 @@ func (e *existError) Error() string {
 }
 
 // Execute runs a command inside a container
-func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (string, string, int, error) {
+func (i *Instance) execute(command []string, opts *ExecOptions, sudo bool) (string, string, int, error) {
 	// TODO: check install
 
 	cmd := initCommand("exec")
-
-	_, exists := c.instances[instance]
-	if !exists {
-		return "", "", -1, &existError{instance}
-	}
+	instance := i.name
 
 	// TODO: bind paths
 
@@ -65,19 +56,23 @@ func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (
 		image = instance
 	}
 
+	err := opts.Env.processEnvVars()
+	if err != nil {
+		return "", "", -1, err
+	}
+	err = opts.Env.processPathMod()
+	if err != nil {
+		return "", "", -1, err
+	}
+	defer opts.Env.unsetAll()
+
 	cmd = append(cmd, image)
 	cmd = append(cmd, command...)
 
-	finalcmd := []string{"bash", "-c"}
-	// adding these is causing SEGFAULTS
-	finalcmd = append(finalcmd, opts.processEnvVars()...)
-	finalcmd = append(finalcmd, opts.processPathMod()...)
-	finalcmd = append(finalcmd, cmd...)
+	fmt.Println(cmd)
 
-	fmt.Println(finalcmd)
-
-	stdout, stderr, status, err := runCommand(finalcmd, &runCommandOptions{
-		sudo:     c.Sudo,
+	stdout, stderr, status, err := runCommand(cmd, &runCommandOptions{
+		sudo:     sudo,
 		quieterr: opts.Quiet,
 		quietout: opts.Quiet,
 	})
@@ -89,29 +84,4 @@ func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (
 
 	return string(stdout.Bytes()), string(stderr.Bytes()), 0, nil
 
-}
-
-func (opts *ExecOptions) processEnvVars() []string {
-	if len(opts.EnvVars) < 1 {
-		return []string{}
-	}
-	envVarStrings := []string{}
-	for k, v := range opts.EnvVars {
-		envVarStrings = append(envVarStrings, fmt.Sprintf("%s%s=%s", senv, k, v))
-	}
-	return envVarStrings
-}
-
-func (opts *ExecOptions) processPathMod() []string {
-	if len(opts.PrependPath) < 1 || len(opts.AppendPath) < 1 {
-		return []string{}
-	}
-	pathVars := []string{}
-	for _, prepath := range opts.PrependPath {
-		pathVars = append(pathVars, fmt.Sprintf("%sPREPEND_PATH=%s", senv, prepath))
-	}
-	for _, apppath := range opts.AppendPath {
-		pathVars = append(pathVars, fmt.Sprintf("%sAPPEND_PATH=%s", senv, apppath))
-	} 
-	return pathVars
 }
