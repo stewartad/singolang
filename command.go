@@ -28,8 +28,8 @@ type runCommandOptions struct {
 func defaultRunCommandOptions() *runCommandOptions {
 	return &runCommandOptions{
 		sudo:     false,
-		quietout: false,
-		quieterr: false,
+		quietout: true,
+		quieterr: true,
 	}
 }
 

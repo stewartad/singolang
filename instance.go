@@ -12,7 +12,9 @@ type Instance struct {
 	protocol string
 	image    string
 	Cleanenv bool
-	Env		 *EnvOptions
+	ImgLabels	 map[string]string
+	ImgEnvVars	 map[string]string
+	EnvOpts	 *EnvOptions
 	cmd      []string
 	Options  []string
 	Metadata []string // might go unused
@@ -40,7 +42,9 @@ func getInstance(image string, name string, options ...string) *Instance {
 		i.name = name
 	}
 	i.Cleanenv = true
-	i.Env = DefaultEnvOptions()
+	i.ImgEnvVars = make(map[string]string)
+	i.ImgLabels = make(map[string]string)
+	i.EnvOpts = DefaultEnvOptions()
 
 	i.Options = options
 	return i
@@ -52,8 +56,8 @@ func (i *Instance) parseImageName(image string) {
 	i.protocol, i.image = SplitURI(image)
 }
 
-// TODO: make this do something
-func (i *Instance) updateMetadata() {
+
+func (i *Instance) updateEnv() {
 
 }
 
@@ -72,9 +76,6 @@ func (i *Instance) start(sudo bool) error {
 	// TODO: use these
 	_, _, _ = stdout, stderr, status
 
-	// this was always throwing an error
-	// err = i.processEnv()
-
 	return err
 }
 
@@ -89,9 +90,24 @@ func (i *Instance) stop(sudo bool) error {
 	return err
 }
 
-// ProcessEnv retrieves all env variables in the instance and stores them in a map
-func (i *Instance) processEnv() error {
-	cmd := []string{"singularity", "exec", "--cleanenv", fmt.Sprintf("instance://%s", i.name), "env"}
+func (i *Instance) RetrieveLabels() error {
+	i.ImgLabels = make(map[string]string)
+	cmd := []string{"singularity", "inspect", "--labels", i.image}
+	stdout, _, _, err := runCommand(cmd, defaultRunCommandOptions())
+
+	for _, label := range strings.Split(string(stdout.Bytes()), "\n") {
+		v := strings.Split(label, ":")
+		if len(v) > 1 {
+			i.ImgLabels[v[0]] = v[1]
+		}
+	}
+	return err
+}
+
+// RetrieveEnv retrieves all env variables in the instance and stores them in a map
+func (i *Instance) RetrieveEnv() error {
+	i.ImgEnvVars = make(map[string]string)
+	cmd := []string{"env"}
 	stdout, _, _, err := i.execute(cmd, DefaultExecOptions(), false)
 	
 	if err != nil {
@@ -101,7 +117,7 @@ func (i *Instance) processEnv() error {
 	for _, env := range strings.Split(stdout, "\n") {
 		v := strings.Split(env, "=")
 		if len(v) > 1 {
-			i.Env.EnvVars[v[0]] = v[1]
+			i.ImgEnvVars[v[0]] = v[1]
 		}
 	}
 
@@ -125,7 +141,7 @@ func (i *Instance) GetInfo() map[string]string {
 
 // GetEnv gets the instance environment
 func (i *Instance) GetEnv() *EnvOptions {
-	return i.Env
+	return i.EnvOpts
 }
 
 // GetCmd returns a slice of strings that represent the full command created when i.Start() was called.

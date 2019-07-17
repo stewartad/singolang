@@ -56,7 +56,7 @@ func (i *Instance) execute(command []string, opts *ExecOptions, sudo bool) (stri
 		image = instance
 	}
 
-	err := opts.Env.processEnvVars()
+	err := opts.Env.ProcessEnvVars()
 	if err != nil {
 		return "", "", -1, err
 	}
@@ -64,8 +64,11 @@ func (i *Instance) execute(command []string, opts *ExecOptions, sudo bool) (stri
 	if err != nil {
 		return "", "", -1, err
 	}
-	defer opts.Env.unsetAll()
 
+	// deferred functions execute LIFO
+	defer i.EnvOpts.ProcessEnvVars()
+	defer opts.Env.unsetAll()
+	
 	cmd = append(cmd, image)
 	cmd = append(cmd, command...)
 

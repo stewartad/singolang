@@ -59,19 +59,24 @@ func (c *Client) Execute(instance string, command []string, opts *ExecOptions) (
 }
 
 // NewInstance creates a new instance and adds it to the client, if it is able to be started
-func (c *Client) NewInstance(image string, name string) error {
+func (c *Client) NewInstance(image string, name string, env *EnvOptions) (*Instance, error) {
 	i := getInstance(image, name)
+	i.EnvOpts = env
 	err := i.start(c.Sudo)
+	i.RetrieveEnv()
+	i.RetrieveLabels()
+	i.EnvOpts.ProcessEnvVars()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	c.instances[name] = i
-	return nil
+	return i, nil
 }
 
 // StopInstance stops an instance previously created in the client
 // TODO: Define custom errors
 func (c *Client) StopInstance(name string) error {
+	c.instances[name].EnvOpts.unsetAll()
 	err := c.instances[name].stop(c.Sudo)
 	return err
 }

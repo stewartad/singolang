@@ -3,6 +3,7 @@ package singolang
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 const senv string = "SINGULARITYENV"
@@ -24,10 +25,30 @@ func DefaultEnvOptions() *EnvOptions {
 	}
 }
 
-func (opts *EnvOptions) processEnvVars() error {
+// UpdateEnv clears all 
+func (opts *EnvOptions) UpdateEnv() error {
+	opts.unsetAll()
+	err := opts.ProcessEnvVars()
+	return err
+}
+
+// ClearEnv will unset all environment variables which contain "SINGULARITYENV_". 
+// It iterates over all environment variables and as such is costly
+func ClearEnv() error {
+	var err error
+	for _, v := range os.Environ() {
+		k := strings.Split(v, "=")
+		if strings.Contains(k[0], "SINGULARITYENV_") {
+			err = os.Unsetenv(k[0])
+		}
+	}
+	return err
+}
+
+func (opts *EnvOptions) ProcessEnvVars() error {
 	var err error
 	for k, v := range opts.EnvVars {
-		varName := fmt.Sprintf("SINGULARITYENV_%s", k)
+		varName := fmt.Sprintf("%s_%s", senv, k)
 		err = os.Setenv(varName, v)
 	}
 	return err
