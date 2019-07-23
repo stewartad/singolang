@@ -102,13 +102,12 @@ func runCommand(cmd []string, opts *runCommandOptions) (bytes.Buffer, bytes.Buff
 		if exitError, ok := err.(*exec.ExitError); ok {
 			waitStatus = exitError.Sys().(syscall.WaitStatus)
 			log.Printf("Command failed with %s\n", err)
+			log.Printf("command.go stdout: %s", string(stdoutBuf.Bytes()))
 			log.Printf("command.go stderr: %s", string(stderrBuf.Bytes()))
 			return stdoutBuf, stderrBuf, waitStatus.ExitStatus(), err
 		}
 	}
-
-	log.Printf("stdout: %s", string(stdoutBuf.Bytes()))
-
+	
 	waitStatus = process.ProcessState.Sys().(syscall.WaitStatus)
 	if errStdout != nil || errStderr != nil {
 		log.Printf("Failed to capture strout or stderr")
