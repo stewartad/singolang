@@ -24,8 +24,8 @@ type Instance struct {
 
 var instanceOpts = runCommandOptions{
 	sudo:     false,
-	quietout: false,
-	quieterr: false,
+	quietout: true,
+	quieterr: true,
 }
 
 func (i *Instance) String() string {
@@ -112,10 +112,6 @@ func (i *Instance) Stop(sudo bool) error {
 		_, _, _ = stdout, stderr, status
 		return err
 	}
-	
-	// TODO: use these
-	// log.Printf("instance stdout: %s\n", stdout)
-	// log.Printf("instance stderr: %s\n", stderr)
 	
 	return err
 }
