@@ -105,8 +105,8 @@ func (i *Instance) Stop(sudo bool) error {
 
 	stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
 	// TODO: use these
-	log.Println(stdout)
-	log.Println(stderr)
+	log.Printf("instance stdout: %s\n", stdout)
+	log.Printf("instance stderr: %s\n", stderr)
 	_, _, _ = stdout, stderr, status
 	return err
 }
