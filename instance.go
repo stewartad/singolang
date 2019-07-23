@@ -91,11 +91,13 @@ func (i *Instance) Start(sudo bool) error {
 		cmd = append(cmd, "--cleanenv")
 	}
 
-	stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
-	// TODO: use these
-	_, _, _ = stdout, stderr, status
-
-	return err
+	if !i.IsRunning() {
+		stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
+		// TODO: use these
+		_, _, _ = stdout, stderr, status
+		return err
+	}
+	return nil
 }
 
 // Stop stops an instance.
