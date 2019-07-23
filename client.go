@@ -73,10 +73,6 @@ func (c *Client) NewInstance(image string, name string, env *EnvOptions) (*Insta
 	i.RetrieveEnv()
 	i.RetrieveLabels()
 
-	for k, v := range env.EnvVars {
-		i.ImgEnvVars[k] = v
-	}
-
 	i.EnvOpts.ProcessEnvVars()
 	// if err != nil {
 	// 	return nil, err
