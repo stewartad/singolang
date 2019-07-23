@@ -124,7 +124,7 @@ func (i *Instance) RetrieveLabels() error {
 	for _, label := range strings.Split(string(stdout.Bytes()), "\n") {
 		v := strings.Split(label, ":")
 		if len(v) > 1 {
-			i.ImgLabels[v[0]] = v[1]
+			i.ImgLabels[strings.TrimSpace(v[0])] = strings.TrimSpace(v[1])
 		}
 	}
 	return err
@@ -143,7 +143,7 @@ func (i *Instance) RetrieveEnv() error {
 	for _, env := range strings.Split(output, "\n") {
 		v := strings.Split(env, "=")
 		if len(v) > 1 {
-			i.ImgEnvVars[v[0]] = v[1]
+			i.ImgEnvVars[strings.TrimSpace(v[0])] = strings.TrimSpace(v[1])
 		}
 	}
 
