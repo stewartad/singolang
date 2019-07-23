@@ -103,11 +103,18 @@ func (i *Instance) Stop(sudo bool) error {
 	cmd := initCommand("instance", "stop")
 	cmd = append(cmd, i.Name)
 
-	stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
+	var err error
+
+	if i.IsRunning() {
+		stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
+		_, _, _ = stdout, stderr, status
+		return err
+	}
+	
 	// TODO: use these
 	// log.Printf("instance stdout: %s\n", stdout)
 	// log.Printf("instance stderr: %s\n", stderr)
-	_, _, _ = stdout, stderr, status
+	
 	return err
 }
 
