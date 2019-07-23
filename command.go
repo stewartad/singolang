@@ -107,6 +107,8 @@ func runCommand(cmd []string, opts *runCommandOptions) (bytes.Buffer, bytes.Buff
 		}
 	}
 
+	log.Printf("%s", string(stdoutBuf.Bytes()))
+
 	waitStatus = process.ProcessState.Sys().(syscall.WaitStatus)
 	if errStdout != nil || errStderr != nil {
 		log.Printf("Failed to capture strout or stderr")
