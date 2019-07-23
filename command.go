@@ -45,6 +45,8 @@ func runCommand(cmd []string, opts *runCommandOptions) (bytes.Buffer, bytes.Buff
 	}
 	name := cmd[0]
 
+	log.Printf("cmd: %s\n", cmd)
+
 	// create command instance
 	process := exec.Command(name, cmd[1:]...)
 
