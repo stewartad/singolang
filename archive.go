@@ -55,5 +55,6 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 		panic("READ ERROR")
 	}
 
+	log.Println(archivePath)
 	return archivePath, tar.NewReader(gzr), nil
 }
