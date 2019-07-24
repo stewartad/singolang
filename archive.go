@@ -32,6 +32,8 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 		Env: DefaultEnvOptions(),
 	}
 
+	log.Println(archivePath)
+
 	// Create archive
 	cmd := []string{"tar", "-C", parentDir, "-czvf", archivePath, file}
 	_, _, code, err := i.Execute(cmd, &opts, i.Sudo)
@@ -55,6 +57,6 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 		panic("READ ERROR")
 	}
 
-	log.Println(archivePath)
+	
 	return archivePath, tar.NewReader(gzr), nil
 }
