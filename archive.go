@@ -23,9 +23,16 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 	archivePath := filepath.Join(dir, fmt.Sprintf("%s-archive.tar.gz", filepath.Base(parentDir)))
 	// archivePath := fmt.Sprintf("%s/%s-archive.tar.gz", dir, filepath.Base(parentDir))
 
+	opts := ExecOptions {
+		Pwd: "",
+		Quiet: false,
+		Cleanenv: true,
+		Env: DefaultEnvOptions(),
+	}
+
 	// Create archive
 	cmd := []string{"tar", "-C", parentDir, "-czvf", archivePath, file}
-	_, _, code, err := i.Execute(cmd, DefaultExecOptions(), i.Sudo)
+	_, _, code, err := i.Execute(cmd, &opts, i.Sudo)
 	if err != nil || code != 0 {
 		return "", nil, err
 	}
