@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"os"
+	"log"
 )
 
 // CopyTarball creates a Tar archive of a directory or file and places it in /tmp.
@@ -39,6 +41,12 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 
 	// Create reader for archive
 	b, err := ioutil.ReadFile(archivePath)
+	tarFile, tarErr := os.Open(archivePath)
+	if tarErr != nil {
+		log.Println("Error reading tar")
+	}
+	fi, _ := tarFile.Stat()
+	fmt.Println(fi.Mode)
 	if err != nil {
 		panic(fmt.Sprintf("Could not read file %s", err))
 	}
