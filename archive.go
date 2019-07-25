@@ -23,8 +23,10 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 	Mkdirp(dir)
 	
 	archivePrefix := filepath.Base(parentDir)
-	if archivePrefix == "" {
+	if archivePrefix == "" || archivePrefix == "/" {
 		archivePrefix = "root"
+	} else if archivePrefix == "." {
+		archivePrefix = "pwd"
 	}
 
 	archivePath := filepath.Join(dir, fmt.Sprintf("%s-archive.tar.gz", archivePrefix))
@@ -39,7 +41,7 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 	log.Println(archivePath)
 
 	// Create archive
-	cmd := []string{"tar", "-C", parentDir, "-czvf", archivePath, file}
+	cmd := []string{"tar", "-C", parentDir, "-czf", archivePath, file}
 	_, _, code, err := i.Execute(cmd, &opts, i.Sudo)
 	if err != nil || code != 0 {
 		return "", nil, err
@@ -50,15 +52,18 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 	tarFile, tarErr := os.Open(archivePath)
 	if tarErr != nil {
 		log.Println("Error reading tar")
+		return "", nil, err
 	}
 	fi, _ := tarFile.Stat()
 	fmt.Println(fi.Mode)
 	if err != nil {
-		panic(fmt.Sprintf("Could not read file %s", err))
+		log.Printf("Could not read file %s", err)
+		return "", nil, err
 	}
 	gzr, err := gzip.NewReader(bytes.NewReader(b))
 	if err != nil {
-		panic("READ ERROR")
+		log.Println("READ ERROR")
+		return "", nil, err
 	}
 
 	
