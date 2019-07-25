@@ -33,7 +33,7 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 
 	opts := ExecOptions {
 		Pwd: "",
-		Quiet: true, // set to false for debugging info
+		Quiet: false, // set to false for debugging info
 		Cleanenv: true,
 		Env: DefaultEnvOptions(),
 	}
