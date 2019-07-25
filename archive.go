@@ -38,7 +38,9 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 		Env: DefaultEnvOptions(),
 	}
 
-	log.Println(archivePath)
+	if !opts.Quiet {
+		log.Println(archivePath)
+	}
 
 	// Create archive
 	cmd := []string{"tar", "-C", parentDir, "-czf", archivePath, file}
@@ -49,13 +51,7 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 
 	// Create reader for archive
 	b, err := ioutil.ReadFile(archivePath)
-	tarFile, tarErr := os.Open(archivePath)
-	if tarErr != nil {
-		log.Println("Error reading tar")
-		return "", nil, err
-	}
-	fi, _ := tarFile.Stat()
-	fmt.Println(fi.Mode)
+
 	if err != nil {
 		log.Printf("Could not read file %s", err)
 		return "", nil, err
