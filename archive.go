@@ -19,7 +19,9 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 	file := filepath.Base(path)
 	parentDir := filepath.Dir(path)
 	// fmt.Printf("%s\t%s\t%s\n", path, file, parentDir)
-	dir := fmt.Sprintf("/tmp/%s", i.Name)
+	dir := filepath.Join(os.TempDir(), i.Name)
+	// dir2 := fmt.Sprintf("/tmp/%s", i.Name)
+	// log.Println(dir, dir2)
 	Mkdirp(dir)
 	
 	archivePath := filepath.Join(dir, fmt.Sprintf("%s-archive.tar.gz", filepath.Base(parentDir)))
@@ -38,6 +40,7 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 	cmd := []string{"tar", "-C", parentDir, "-czvf", archivePath, file}
 	_, _, code, err := i.Execute(cmd, &opts, i.Sudo)
 	if err != nil || code != 0 {
+		log.Println("Houston we have a problem")
 		return "", nil, err
 	}
 
