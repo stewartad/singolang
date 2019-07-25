@@ -31,24 +31,12 @@ func NewClient() (*Client, func(c *Client)) {
 		func(c *Client) { c.StopAllInstances() }
 }
 
-// Version returns the version of the system's Singularity installation
-func (c *Client) Version() string {
-	return GetSingularityVersion()
-}
-
 // TODO: Clean this up
 func (c *Client) String() string {
 	baseClient := "[singularity-golang]"
 
 	return baseClient
 }
-
-// func (c *Client) GetInstance(instance string) *Instance {
-// 	if _, exists := c.instances[instance]; !exists {
-// 		return nil
-// 	}
-// 	return c.instances[instance]
-// }
 
 // NewInstance creates a new instance and adds it to the client, if it is able to be started
 func (c *Client) NewInstance(image string, name string, env *EnvOptions) (*Instance, error) {
@@ -71,7 +59,7 @@ func (c *Client) StopAllInstances() error {
 }
 
 // ListAllInstances lists all currently running Singularity instances.
-// It is equivalent to running `singularity instance list`
+// It is equivalent to running `singularity instance list` on the host system
 func ListAllInstances() string {
 	cmd := initCommand("instance", "list")
 

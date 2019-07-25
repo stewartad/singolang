@@ -14,7 +14,6 @@ import (
 func initCommand(args ...string) []string {
 	cmd := []string{"singularity"}
 	cmd = append(cmd, args...)
-	// append quiet or debug if flags are set in client
 	return cmd
 }
 
@@ -24,7 +23,6 @@ type runCommandOptions struct {
 	quieterr bool
 }
 
-//
 func defaultRunCommandOptions() *runCommandOptions {
 	return &runCommandOptions{
 		sudo:     false,

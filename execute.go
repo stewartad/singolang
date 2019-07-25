@@ -32,7 +32,7 @@ func (e *existError) Error() string {
 	return fmt.Sprintf("%s is not a loaded instance", e.instance)
 }
 
-// Execute runs a command inside a container
+// Execute runs a command inside the instance. Returns stdout, stderr, return code, and an error, if any
 func (i *Instance) Execute(command []string, opts *ExecOptions) (string, string, int, error) {
 	// TODO: check install
 

@@ -3,7 +3,6 @@ package singolang
 import (
 	"fmt"
 	"strings"
-	_"log"
 )
 
 // Instance holds information about a currently running image instance
@@ -18,6 +17,7 @@ type Instance struct {
 	EnvOpts	 *EnvOptions
 	Sudo	 bool
 	cmd      []string
+	running	 bool
 }
 
 var instanceOpts = runCommandOptions{
@@ -26,6 +26,7 @@ var instanceOpts = runCommandOptions{
 	quieterr: true,
 }
 
+// TODO; Clean this up
 func (i *Instance) String() string {
 	if i.Protocol != "" {
 		return fmt.Sprintf("%s:\\%s", i.Protocol, i.Image)
@@ -46,35 +47,20 @@ func getInstance(image string, name string, sudo bool) *Instance {
 	i.ImgLabels = make(map[string]string)
 	i.EnvOpts = DefaultEnvOptions()
 	i.Sudo = sudo
+	i.running = false
 
 	return i
 }
 
+// IsRunning returns true if the instance ins currently running
 func (i *Instance) IsRunning() bool {
-	cmd := []string{"singularity", "instance", "list"}
-	opts := runCommandOptions{
-		sudo: i.Sudo,
-		quietout: true,
-		quieterr: true,
-	}
-	stdout, _, _, err := runCommand(cmd, &opts) 
-	if err != nil {
-		return false
-	}
-	name := fmt.Sprintf("%s", i.Name)
-	output := string(stdout.Bytes())
-	return strings.Contains(output, name)
+	return i.running
 }
 
 // parseImageName processes the image name and protocol
 func (i *Instance) parseImageName(image string) {
 	i.ImageURI = image
 	i.Protocol, i.Image = SplitURI(image)
-}
-
-
-func (i *Instance) updateEnv() {
-
 }
 
 // Start starts an instance
@@ -87,13 +73,15 @@ func (i *Instance) Start() error {
 		cmd = append(cmd, "--cleanenv")
 	}
 
-	if !i.IsRunning() {
-		stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
-		// TODO: use these
-		_, _, _ = stdout, stderr, status
-		return err
+	var err error
+	var status = 1
+	if !i.running {
+		_, _, status, err = runCommand(cmd, &instanceOpts)
+		if status == 0 {
+			i.running = true
+		}
 	}
-	return nil
+	return err
 }
 
 // Stop stops an instance.
@@ -101,15 +89,20 @@ func (i *Instance) Stop() error {
 	cmd := initCommand("instance", "stop")
 	cmd = append(cmd, i.Name)
 
+	var status = 1
 	var err error
 
-	if i.IsRunning() {
-		_, _, _, err = runCommand(cmd, &instanceOpts)
+	if i.running {
+		_, _, status, err = runCommand(cmd, &instanceOpts)
+		if status == 0 {
+			i.running = false
+		}
 	}
 	
 	return err
 }
 
+// RetrieveLabels gets the labels of the instance using `singularity inspect` and loads them into the map ImgLabels
 func (i *Instance) RetrieveLabels() error {
 	i.ImgLabels = make(map[string]string)
 	cmd := []string{"singularity", "inspect", "--labels", i.Image}
@@ -124,7 +117,7 @@ func (i *Instance) RetrieveLabels() error {
 	return err
 }
 
-// RetrieveEnv retrieves all env variables in the instance and stores them in a map
+// RetrieveEnv retrieves all env variables in the instance and stores them in the map ImgEnvVars
 func (i *Instance) RetrieveEnv() error {
 	i.ImgEnvVars = make(map[string]string)
 	cmd := initCommand("exec")
@@ -149,6 +142,7 @@ func (i *Instance) RetrieveEnv() error {
 	return err
 }
 
+// SetEnv replaces the environment options of an instance and then processes the changes
 func (i *Instance) SetEnv(opts *EnvOptions) {
 	i.EnvOpts = opts
 	i.RetrieveEnv()
@@ -156,13 +150,7 @@ func (i *Instance) SetEnv(opts *EnvOptions) {
 	i.EnvOpts.ProcessEnvVars()
 }
 
-// GetEnv gets the instance environment
-func (i *Instance) GetEnv() *EnvOptions {
-	return i.EnvOpts
-}
-
 // GetCmd returns a slice of strings that represent the full command created when i.Start() was called.
-// This slice can immediately be passed into RunCommand() to be ran again
 func (i *Instance) GetCmd() []string {
 	return i.cmd
 }
