@@ -44,8 +44,8 @@ func (i *Instance) CopyTarball(path string) (string, *tar.Reader, error) {
 
 	// Create archive
 	cmd := []string{"tar", "-C", parentDir, "-czf", archivePath, file}
-	_, _, code, err := i.Execute(cmd, &opts, i.Sudo)
-	if err != nil || code != 0 {
+	_, _, _, err := i.Execute(cmd, &opts)
+	if err != nil {
 		return archivePath, nil, err
 	}
 

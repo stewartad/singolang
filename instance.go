@@ -18,8 +18,6 @@ type Instance struct {
 	EnvOpts	 *EnvOptions
 	Sudo	 bool
 	cmd      []string
-	Options  []string
-	Metadata []string // might go unused
 }
 
 var instanceOpts = runCommandOptions{
@@ -36,7 +34,7 @@ func (i *Instance) String() string {
 }
 
 // GetInstance returns a new Instance with image information
-func getInstance(image string, name string, options ...string) *Instance {
+func getInstance(image string, name string, sudo bool) *Instance {
 	i := new(Instance)
 	i.parseImageName(image)
 
@@ -47,9 +45,8 @@ func getInstance(image string, name string, options ...string) *Instance {
 	i.ImgEnvVars = make(map[string]string)
 	i.ImgLabels = make(map[string]string)
 	i.EnvOpts = DefaultEnvOptions()
-	i.Sudo = false
+	i.Sudo = sudo
 
-	i.Options = options
 	return i
 }
 
@@ -81,8 +78,7 @@ func (i *Instance) updateEnv() {
 }
 
 // Start starts an instance
-// Does not support startscript args
-func (i *Instance) Start(sudo bool) error {
+func (i *Instance) Start() error {
 	cmd := initCommand("instance", "start")
 
 	cmd = append(cmd, i.ImageURI, i.Name)
@@ -101,16 +97,14 @@ func (i *Instance) Start(sudo bool) error {
 }
 
 // Stop stops an instance.
-func (i *Instance) Stop(sudo bool) error {
+func (i *Instance) Stop() error {
 	cmd := initCommand("instance", "stop")
 	cmd = append(cmd, i.Name)
 
 	var err error
 
 	if i.IsRunning() {
-		stdout, stderr, status, err := runCommand(cmd, &instanceOpts)
-		_, _, _ = stdout, stderr, status
-		return err
+		_, _, _, err = runCommand(cmd, &instanceOpts)
 	}
 	
 	return err
@@ -138,7 +132,7 @@ func (i *Instance) RetrieveEnv() error {
 		cmd = append(cmd, "--cleanenv")
 	}
 	cmd = append(cmd, i.Image, "env")
-	
+
 	stdout, _, _, err := runCommand(cmd, defaultRunCommandOptions())
 	output := string(stdout.Bytes())
 	if err != nil {
@@ -153,21 +147,6 @@ func (i *Instance) RetrieveEnv() error {
 	}
 
 	return err
-}
-
-/*
- * Getters for Instance fields
- */
-
-// GetInfo returns the information about an Instance
-func (i *Instance) GetInfo() map[string]string {
-	m := make(map[string]string)
-	m["name"] = i.Name
-	m["imageURI"] = i.ImageURI
-	m["protocol"] = i.Protocol
-	m["image"] = i.Image
-	m["cmd"] = strings.Join(i.cmd, " ")
-	return m
 }
 
 func (i *Instance) SetEnv(opts *EnvOptions) {
