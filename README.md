@@ -74,13 +74,13 @@ if err != nil {
 
 Start the instance
 
-```
+```go
 instance.Start()
 ```
 
 Stop the instance
 
-```
+```go
 instance.Stop()
 ```
 
@@ -103,7 +103,7 @@ stdout, stderr, code, err := instance.Execute([]string{"which", "fortune"}, %exe
 
 You can copy a file or folder from inside the container into a .tar archive, which is placed in your OS temp directory
 
-```
+```go
 path, read, err := instance.CopyTarball(targetPath)
 ```
 
