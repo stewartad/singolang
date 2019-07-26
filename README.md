@@ -9,6 +9,7 @@ Singolang is a library to interact with Singularity containers in Go. It is mode
 * Pulling images from Dockerhub or Singularity Hub
 * Starting and Stopping instances of built images
 * Executing commands in running instances
+* Copying files inside a running instance to the host system
 
 ## Usage
 
@@ -51,17 +52,59 @@ if err != nil {
 
 ### Create an Instance
 
+You can define environment variables as well as modify the PATH variable of a container before creating an instance by filling out an `EnvOption` struct and passing it to the client's `NewInstance()` function
+
 ```go
-err := client.NewInstance("lolcow_latest.sif", "lolcow3")
+instanceEnv := singolang.EnvOptions {
+    EnvVars: map[string]string {
+        "hello": "world",
+    },
+    PrependPath: []string{"/usr/local/go/bin"},
+    AppendPath: []string{"/usr/local/games"},
+    ReplacePath: "",
+}
+
+instance, err := client.NewInstance("lolcow_latest.sif", "lolcow3", &instanceEnv)
 if err != nil {
     fmt.Println(err)
 }
 ```
 
+`NewInstance()` creates and returns a new Instance struct and adds it to the client's list of instances.
+
+Start the instance
+
+```
+instance.Start()
+```
+
+Stop the instance
+
+```
+instance.Stop()
+```
+
 ### Execute a Command
 
+Executing a command has its own configuration struct. Pwd will execute the command in the given directory. Quiet, if true, will supress output to stdout and stderr. Cleanenv will ensure the host's environment variables are not copied over to the container while while executing the command. You can specify EnvOptions like above to change the containers environment before the command runs.
+
 ```go
-opts := singolang.DefaultExecOptions()
-stdout, stderr, code, err := client.Execute("lolcow3", []string{"which", "fortune"}, opts)
-fmt.Printf("%s\n%s\n%d\t%s\n", stdout, stderr, code, err)
+execOpts := singolangExecOptions{
+    Pwd:   "",
+    Quiet: true,
+    Cleanenv: true,
+    Env: DefaultEnvOptions(),
+}
+
+stdout, stderr, code, err := instance.Execute([]string{"which", "fortune"}, %execOpts)
 ```
+
+### Copy a file
+
+You can copy a file or folder from inside the container into a .tar archive, which is placed in your OS temp directory
+
+```
+path, read, err := instance.CopyTarball(targetPath)
+```
+
+`CopyTarball()` returns the path to the archive, a Tar reader for the archive, and an error, if any
