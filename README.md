@@ -35,13 +35,13 @@ Pullfolder is the folder to place the final image
 Force, if true, will overwrite any existing files of the same name
 
 ```go
-opts := &singolang.PullOptions{
+opts := singolang.PullOptions{
     Name: "",
     Pullfolder: filepath.Join("/tmp", "pull"),
     Force: false,
 }
 
-imgPath, err := client.Pull("docker://godlovedc/lolcow", pullOpts)
+imgPath, err := client.Pull("docker://godlovedc/lolcow", &pullOpts)
 
 if err != nil {
     fmt.Println(err)
@@ -96,7 +96,7 @@ execOpts := singolangExecOptions{
     Env: DefaultEnvOptions(),
 }
 
-stdout, stderr, code, err := instance.Execute([]string{"which", "fortune"}, %execOpts)
+stdout, stderr, code, err := instance.Execute([]string{"which", "fortune"}, &execOpts)
 ```
 
 ### Copy a file
@@ -107,7 +107,48 @@ You can copy a file or folder from inside the container into a .tar archive, whi
 path, read, err := instance.CopyTarball(targetPath)
 ```
 
-`CopyTarball()` returns the path to the archive, a Tar reader for the archive, and an error, if any
+`CopyTarball()` returns the path to the archive, a Tar reader for the archive, and an error, if any.
+
+### Environment Variables
+
+Singolang allows you to define and modify environment variables within your container with an `EnvOptions` struct.
+
+```go
+env := singolang.EnvOptions{
+    EnvVars: map[string]string{"FOO": "bar", "HELLO": "world"},
+    PrependPath: []string{"/home/username/spack/"},
+    AppendPath: []string{},
+    ReplacePath: "/usr/bin:/usr/local/bin"
+}
+```
+
+`EnvVars` is a map of all the environment variables you want to set in the container. The example above would be the equivalent of running the following in bash:
+
+```bash
+export FOO=bar
+export HELLO=world
+```
+
+PrependPath and AppendPath is a slice of strings which will be added to the PATH, either at the front or the back, respectfully.
+
+ReplacePath will replace the path entirely.
+
+This struct can either be placed into an `ExecOptions` struct to be used for one `exec` command only, or be passed to a running Instance to affect the entire container.
+
+```go
+// Setting entire instance environment
+instance.SetEnv(&env)
+
+// Set environment for one exec command
+execOpts := singolangExecOptions{
+    Pwd:   "",
+    Quiet: true,
+    Cleanenv: true,
+    Env: &env,
+}
+
+stdout, stderr, code, err := instance.Execute([]string{"which", "fortune"}, &execOpts)
+```
 
 ## License
 

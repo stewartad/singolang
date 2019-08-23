@@ -5,9 +5,9 @@ import (
 	"testing"
 )
 
-var TestPath = "docker://vsoch/hello-world"
+var TestPath = "docker://godlovedc/lolcow"
 var ExpectedProtocol = "docker"
-var ExpectedPath = "vsoch/hello-world"
+var ExpectedPath = "godlovedc/lolcow"
 
 // TestSplitURI tests utils.SplitURI
 func TestSplitURI(t *testing.T) {
@@ -25,13 +25,5 @@ func TestRemoveURI(t *testing.T) {
 	path := RemoveURI(TestPath)
 	if strings.Compare(path, ExpectedPath) != 0 {
 		t.Errorf("Incorrect path, expected path %s, got %s", ExpectedPath, path)
-	}
-}
-
-func TestSingularityVersion(t *testing.T) {
-	expectedOut := "singularity version 3.2.1"
-	actualOut := GetSingularityVersion()
-	if strings.Compare(expectedOut, actualOut) != 0 {
-		t.Errorf("Singularity versions %s and %s do not match", expectedOut, actualOut)
 	}
 }

@@ -18,6 +18,7 @@ func TestExecute(t *testing.T) {
 		expSerr string
 		expCode int
 		expErr  bool
+		env		*EnvOptions
 	}{
 		{
 			desc:    "basic echo",
@@ -32,7 +33,7 @@ func TestExecute(t *testing.T) {
 			cmd:     []string{"grep"},
 			expSout: "",
 			expSerr: "Usage:",
-			expCode: -1,
+			expCode: 2,
 			expErr:  true,
 		},
 		{
@@ -40,7 +41,7 @@ func TestExecute(t *testing.T) {
 			cmd:     []string{"false"},
 			expSout: "",
 			expSerr: "",
-			expCode: -1,
+			expCode: 1,
 			expErr:  true,
 		},
 		{
@@ -54,44 +55,51 @@ func TestExecute(t *testing.T) {
 	}
 
 	c, teardown := NewClient()
-	err := c.NewInstance(testImage, "lolcow_test")
+	instance, err := c.NewInstance(testImage, "lolcow_test", DefaultEnvOptions())
+	instance.Start()
 	if err != nil {
-		t.Errorf("Error creating insctance")
+		t.Errorf("Error creating instance")
 	}
 	defer teardown(c)
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			stdout, stderr, code, err := c.Execute("lolcow_test", tC.cmd, DefaultExecOptions())
+			stdout, stderr, code, err := instance.Execute(tC.cmd, DefaultExecOptions())
 			if !strings.Contains(strings.TrimSpace(stdout), tC.expSout) {
 				t.Errorf("Unexpected Stdout: %s", stdout)
-			} else if !strings.Contains(strings.TrimSpace(stderr), tC.expSerr) {
+			}
+			if !strings.Contains(strings.TrimSpace(stderr), tC.expSerr) {
 				t.Errorf("Unexpected Stderr: %s", stderr)
-			} else if code != tC.expCode {
+			}
+			if code != tC.expCode {
 				t.Errorf("Unexpected Return Code: %d", code)
-			} else if err == nil && tC.expErr {
+			}
+			if err == nil && tC.expErr {
 				t.Errorf("Expected Error but didn't get one")
-			} else if err != nil && !tC.expErr {
+			}
+			if err != nil && !tC.expErr {
 				t.Errorf("Unexpected Error")
 			}
 
 		})
 	}
-
+	instance.Stop()
 }
 
 func TestInstance(t *testing.T) {
-	testCases := []struct {
-		desc string
-	}{
-		{
-			desc: "",
-		},
+	client, teardown := NewClient();
+	defer teardown(client)
+	instance, err := client.NewInstance(testImage, "lolcow_test", DefaultEnvOptions())
+	if err != nil {
+		t.Errorf("Error creating instance")
 	}
-	for _, tC := range testCases {
-		t.Run(tC.desc, func(t *testing.T) {
-
-		})
+	err = instance.Start()
+	if err != nil {
+		t.Errorf("Error starting instance")
+	}
+	err = instance.Stop()
+	if err != nil {
+		t.Errorf("Error stopping instance")
 	}
 }
 
